@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responder Avaliação</title>
+</head>
+<body>
+    <h2>Responder Avaliação</h2>
+    <form id="avaliacaoForm" action="/enviar-respostas/<%= avaliacao.test_name %>/<%= candidato.token %>" method="post">
+        <input type="hidden" name="avaliacao_id" value="<%= avaliacao.id %>">
+        <input type="hidden" name="candidato_id" value="<%= candidato.id %>">
+
+        <!-- Perguntas da avaliação -->
+        <div id="perguntas">
+            <% perguntas.forEach(pergunta => { %>
+                <div>
+                    <h3><%= pergunta.texto %></h3>
+                    <input type="hidden" name="respostas[<%= pergunta.id %>][pergunta_id]" value="<%= pergunta.id %>">
+                    <label for="respostas[<%= pergunta.id %>][texto]">Resposta:</label>
+                    <input type="text" name="respostas[<%= pergunta.id %>][texto]" id="respostas[<%= pergunta.id %>][texto]">
+                </div>
+            <% }) %>
+        </div>
+
+        <button type="submit">Enviar Respostas</button>
+    </form>
+</body>
+</html>

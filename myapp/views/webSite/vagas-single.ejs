@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="pt-br">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="voe consultoria em gestão de pessoas">
+
+    <meta name="author" content="https://instagram.com/joubertgruna">
+
+    <title>VOE | <%=vagas.cargo%></title>
+
+    <!-- bootstrap.min css -->
+    <link rel="stylesheet" href="../webSite/plugins/bootstrap/css/bootstrap.min.css">
+    <!-- Icon Font Css -->
+    <link rel="stylesheet" href="../webSite/plugins/themify/css/themify-icons.css">
+    <link rel="stylesheet" href="../webSite/plugins/fontawesome/css/all.css">
+    <link rel="stylesheet" href="../webSite/plugins/magnific-popup/dist/magnific-popup.css">
+    <!-- Owl Carousel CSS -->
+    <link rel="stylesheet" href="../webSite/plugins/slick-carousel/slick/slick.css">
+    <link rel="stylesheet" href="../webSite/plugins/slick-carousel/slick/slick-theme.css">
+
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="../webSite/css/style.css">
+
+</head>
+
+<body>
+
+    <!-- Header Start -->
+
+    <%- include('./partials/header')%>
+
+        <!-- Header Close -->
+
+        <div class="main-wrapper ">
+            <section class="page-title bg-1">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="block text-center">
+                                <span class="text-white">Detalhes da vaga</span>
+                                <h2 class="text-white mb-4 text-mb">
+                                    <%=vagas.cargo%>
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section blog-wrap bg-dark">
+                <div class="container">
+                    <div class="row ">
+                        <div class="col-lg-12">
+                            <div class="row">
+                                <div class="col-lg-12 mb-2">
+                                    <div class="single-blog-item">
+                                        <div class="blog-item-content bg-white p-5">
+                                            <h2 class="mt-3 mb-4"><a href="blog-single.html">
+                                                    <%= vagas.cargo %>
+                                                </a></h2>
+                                            <p class="lead mb-4"><strong>Sobre a vaga:</strong> <span id="descricao">
+                                                    <%= descricao %>
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12 ">
+                                    <div class="basic-form">
+                                        <!DOCTYPE html>
+                                        <html lang="pt-BR">
+
+                                        <head>
+                                            <meta charset="UTF-8">
+                                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                            <title>Formulário de Contato</title>
+                                        </head>
+
+                                        <body>
+
+                                            <form class="contact-form bg-white rounded p-5" id="comment-form"
+                                                method="POST" action="/admin/candidatos-cad"
+                                                enctype="multipart/form-data">
+                                                <input type="hidden" name="tag" value="formCandidato">
+                                                <div class="form-row">
+                                                    <input type="hidden" name="vagaAplicada" value="<%= vagas.cargo %>">
+                                                    <div class="form-group col-md-6">
+                                                        <label>Nome</label>
+                                                        <input type="text" class="form-control" name="nome"
+                                                            placeholder="Digite o nome">
+                                                        <div class="error-message" id="nome-error"></div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>Email</label>
+                                                        <input type="email" name="email" class="form-control"
+                                                            placeholder="Digite o Email">
+                                                        <div class="error-message" id="email-error"></div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>Celular</label>
+                                                        <input type="text" name="celular" class="form-control"
+                                                            placeholder="Digite seu numero">
+                                                        <div class="error-message" id="celular-error"></div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>Idade</label>
+                                                        <input type="text" name="idade" class="form-control"
+                                                            placeholder="Digite a idade">
+                                                        <div class="error-message" id="idade-error"></div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>Gênero</label>
+                                                        <input type="text" name="genero" class="form-control"
+                                                            placeholder="Digite o gênero">
+                                                        <div class="error-message" id="genero-error"></div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>Cidade</label>
+                                                        <input type="text" name="cidade" class="form-control"
+                                                            placeholder="Digite a cidade">
+                                                        <div class="error-message" id="cidade-error"></div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>Estado</label>
+                                                        <select id="estado" name="estado" class="form-control">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="AC">Acre (AC)</option>
+                                                            <option value="AL">Alagoas (AL)</option>
+                                                            <option value="AP">Amapá (AP)</option>
+                                                            <option value="AM">Amazonas (AM)</option>
+                                                            <option value="BA">Bahia (BA)</option>
+                                                            <option value="CE">Ceará (CE)</option>
+                                                            <option value="DF">Distrito Federal (DF)</option>
+                                                            <option value="ES">Espírito Santo (ES)</option>
+                                                            <option value="GO">Goiás (GO)</option>
+                                                            <option value="MA">Maranhão (MA)</option>
+                                                            <option value="MT">Mato Grosso (MT)</option>
+                                                            <option value="MS">Mato Grosso do Sul (MS)</option>
+                                                            <option value="MG">Minas Gerais (MG)</option>
+                                                            <option value="PA">Pará (PA)</option>
+                                                            <option value="PB">Paraíba (PB)</option>
+                                                            <option value="PR">Paraná (PR)</option>
+                                                            <option value="PE">Pernambuco (PE)</option>
+                                                            <option value="PI">Piauí (PI)</option>
+                                                            <option value="RJ">Rio de Janeiro (RJ)</option>
+                                                            <option value="RN">Rio Grande do Norte (RN)</option>
+                                                            <option value="RS">Rio Grande do Sul (RS)</option>
+                                                            <option value="RO">Rondônia (RO)</option>
+                                                            <option value="RR">Roraima (RR)</option>
+                                                            <option value="SC">Santa Catarina (SC)</option>
+                                                            <option value="SP">São Paulo (SP)</option>
+                                                            <option value="SE">Sergipe (SE)</option>
+                                                            <option value="TO">Tocantins (TO)</option>
+                                                        </select>
+                                                        <div class="error-message" id="estado-error"></div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>CEP</label>
+                                                        <input type="text" name="cep" class="form-control"
+                                                            placeholder="Digite seu CEP">
+                                                        <div class="error-message" id="cep-error"></div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>Rua</label>
+                                                        <input type="text" name="rua" class="form-control"
+                                                            placeholder="Digite sua rua">
+                                                        <div class="error-message" id="rua-error"></div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>Número</label>
+                                                        <input type="text" name="numero" class="form-control"
+                                                            placeholder="Nº">
+                                                        <div class="error-message" id="numero-error"></div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>Possui Deficiência</label>
+                                                        <select id="inputState" name="possuiDeficiencia"
+                                                            class="form-control">
+                                                            <option value="">Selecione... </option>
+                                                            <option value="SIM">SIM</option>
+                                                            <option value="NÃO">NÃO</option>
+                                                        </select>
+                                                        <div class="error-message" id="possuiDeficiencia-error"></div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>Tipo de Deficiência</label>
+                                                        <input type="text" name="tipoDeDeficiencia" class="form-control"
+                                                            placeholder="Digite a Deficiência">
+                                                        <div class="error-message" id="tipoDeDeficiencia-error"></div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>Formação Acadêmica</label>
+                                                        <select id="inputState" name="formacaoAcademica"
+                                                            class="form-control">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="Ensino Médio Completo">Ensino Médio Completo
+                                                            </option>
+                                                            <option value="Ensino Médio Incompleto">Ensino Médio
+                                                                Incompleto</option>
+                                                            <option value="Ensino técnico completo ou em curso">Ensino
+                                                                técnico completo ou em curso</option>
+                                                            <option value="Ensino superior completo ou em curso">Ensino
+                                                                superior completo ou em curso</option>
+                                                            <option value="Pós Graduação/Especialização">Pós
+                                                                Graduação/Especialização</option>
+                                                        </select>
+                                                        <div class="error-message" id="formacaoAcademica-error"></div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>Experiência profissional</label>
+                                                        <textarea type="text" name="experienciaProfissional"
+                                                            class="form-control"
+                                                            placeholder="Digite a experiência profissional"></textarea>
+                                                        <div class="error-message" id="experienciaProfissional-error">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>Cursos extra curriculares</label>
+                                                        <input type="text" name="cursosExtracurriculares"
+                                                            class="form-control" placeholder="Digite os cursos">
+                                                        <div class="error-message" id="cursosExtracurriculares-error">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>Idiomas</label>
+                                                        <input type="text" name="idiomas" class="form-control"
+                                                            placeholder="Digite o idioma">
+                                                        <div class="error-message" id="idiomas-error"></div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>Informações adicionais</label>
+                                                        <textarea type="text" name="informacoesAdicionais"
+                                                            class="form-control"
+                                                            placeholder="Digite as informações adicionais"></textarea>
+                                                        <div class="error-message" id="informacoesAdicionais-error">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>Pretenção salarial</label>
+                                                        <input type="text" name="pretencaoSalarial" class="form-control"
+                                                            placeholder="Digite a pretenção salarial">
+                                                        <div class="error-message" id="pretencaoSalarial-error"></div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>Enviar curriculo </label><br>
+                                                        <input type="file" name="arquivo"
+                                                            placeholder="Carregar curriculo">
+                                                        <div class="error-message" id="arquivo-error"></div>
+                                                    </div>
+                                                </div>
+                                                <button class="btn btn-dark btn-main btn-round-full"
+                                                    type="submit">Aplicar</button>
+                                                    <p class="text-center pt-3 text-small text-warning" style="font-size: small;"><strong>VERIFIQUE SE TODOS OS DADOS FORAM PREENCHIDOS CORRETAMENTE</strong></p>
+                                            </form>
+
+
+                                        </body>
+
+                                        </html>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+
+
+                    </div>
+                </div>
+        </div>
+        </div>
+
+        </div>
+        </div>
+        </div>
+        </section>
+
+
+        <!-- footer Start -->
+        <%- include('./partials/footer')%>
+
+            </div>
+
+            <!-- 
+    Essential Scripts
+    =====================================-->
+
+            <%- include('./partials/scripts')%>
+
+</body>
+
+
+</html>

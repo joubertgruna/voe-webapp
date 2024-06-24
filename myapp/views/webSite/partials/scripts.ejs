@@ -1,0 +1,64 @@
+<!-- Main jQuery -->
+<script src="../webSite/plugins/jquery/jquery.js"></script>
+<script src="../webSite/js/contact.js"></script>
+<!-- Bootstrap 4.3.1 -->
+<script src="../webSite/plugins/bootstrap/js/popper.js"></script>
+<script src="../webSite/plugins/bootstrap/js/bootstrap.min.js"></script>
+<!--  Magnific Popup-->
+<script src="../webSite/plugins/magnific-popup/dist/jquery.magnific-popup.min.js"></script>
+<!-- Slick Slider -->
+<script src="../webSite/plugins/slick-carousel/slick/slick.min.js"></script>
+<!-- Counterup -->
+<script src="../webSite/plugins/counterup/jquery.waypoints.min.js"></script>
+<script src="../webSite/plugins/counterup/jquery.counterup.min.js"></script>
+
+<!-- Google Map -->
+<script src="../webSite/plugins/google-map/map.js"></script>
+<script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAkeLMlsiwzp6b3Gnaxd86lvakimwGA6UA&callback=initMap"></script>
+
+<script src="../webSite/js/script.js"></script>
+
+<script>
+    function transformarTextoParaHTML() {
+        var descricaoElement = document.getElementById('descricao');
+        var descricaoTexto = descricaoElement.innerText;
+        var descricaoHTML = descricaoTexto.replace(/\n/g, '<br>');
+        descricaoElement.innerHTML = descricaoHTML;
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        transformarTextoParaHTML();
+    });
+
+    function validateForm() {
+        let isValid = true;
+
+        const formElements = document.querySelectorAll('.form-control, .form-group select, .form-group textarea, .form-group input[type="file"]');
+        formElements.forEach(element => {
+            const errorElement = document.getElementById(element.name + '-error');
+            if (element.type === 'file') {
+                if (!element.files.length) {
+                    errorElement.textContent = 'Este campo é obrigatório.';
+                    isValid = false;
+                } else {
+                    errorElement.textContent = '';
+                }
+            } else if (element.value.trim() === '') {
+                errorElement.textContent = 'Este campo é obrigatório.';
+                isValid = false;
+            } else {
+                errorElement.textContent = '';
+            }
+        });
+
+        return isValid;
+    }
+
+    document.getElementById('comment-form').addEventListener('submit', function (event) {
+        if (!validateForm()) {
+            event.preventDefault(); // Impede o envio do formulário se não for válido
+        }
+    });
+
+
+</script>

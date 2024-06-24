@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>VOE - Admin Dashboard</title>
+    <!-- Favicon icon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="../dashBoard/images/favicon.png">
+    <link href="../dashBoard/css/style.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <!--*******************
+        Preloader start
+    ********************-->
+    <div id="preloader">
+        <div class="sk-three-bounce">
+            <div class="sk-child sk-bounce1"></div>
+            <div class="sk-child sk-bounce2"></div>
+            <div class="sk-child sk-bounce3"></div>
+        </div>
+    </div>
+    <!--*******************
+        Preloader end
+    ********************-->
+
+
+    <!--**********************************
+        Main wrapper start
+    ***********************************-->
+    <div id="main-wrapper">
+
+        <!--**********************************
+            Nav header start
+        ***********************************-->
+        <%- include('./partials/nav-header') %>
+            <!--**********************************
+            Nav header end
+        ***********************************-->
+
+            <!--**********************************
+            Header start
+        ***********************************-->
+            <%- include('./partials/header') %>
+                <!--**********************************
+            Header end ti-comment-alt
+        ***********************************-->
+
+                <!--**********************************
+            Sidebar start
+        ***********************************-->
+                <%- include('./partials/sidebar') %>
+                    <!--**********************************
+            Sidebar end
+        ***********************************-->
+
+                    <!--**********************************
+            Content body start
+        ***********************************-->
+                    <div class="content-body">
+                        <div class="container-fluid">
+                            <div class="row page-titles mx-0">
+                                <div class="col-sm-6 p-md-0">
+                                    <div class="welcome-text">
+                                        <h4>Olá, {nome}</h4>
+                                        <p class="mb-0">Registre um novo candidato</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                                    <ol class="breadcrumb">
+                                        <li class="breadcrumb-item"><a href="javascript:void(0)">DashBoard</a></option>
+                                        <li class="breadcrumb-item active"><a href="javascript:void(0)">Novo Talento</a>
+                                            </option>
+                                    </ol>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h4 class="card-title">Registrar</h4>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="basic-form">
+                                                <form method="POST" action="/admin/candidatos-cad" enctype="multipart/form-data">
+                                                    <div class="form-row">
+                                                        <div class="form-group col-md-6">
+                                                            <label>Nome</label>
+                                                            <input type="text" class="form-control" name="nome"
+                                                                placeholder="Digite o nome">
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>Email</label>
+                                                            <input type="email" name="email" class="form-control"
+                                                                placeholder="Digite o Email">
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>Celular</label>
+                                                            <input type="text" name="celular" class="form-control"
+                                                                placeholder="Digite seu numero">
+                                                            <div class="error-message" id="celular-error"></div>
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>Idade</label>
+                                                            <input type="text" name="idade" class="form-control"
+                                                                placeholder="Digite a idade">
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>Gênero</label>
+                                                            <input type="text" name="genero" class="form-control"
+                                                                placeholder="Digite o genero">
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>Cidade</label>
+                                                            <input type="text" name="cidade" class="form-control"
+                                                                placeholder="Digite a cidade">
+                                                        </div>
+                                                        
+                                                        <div class="form-group col-md-6">
+                                                            <label>Estado</label>
+                                                            <select id="estado" name="estado" class="form-control">
+                                                                <option selected>Selecione...</option>
+                                                                <option value="AC">Acre (AC)</option>
+                                                                <option value="AL">Alagoas (AL)</option>
+                                                                <option value="AP">Amapá (AP)</option>
+                                                                <option value="AM">Amazonas (AM)</option>
+                                                                <option value="BA">Bahia (BA)</option>
+                                                                <option value="CE">Ceará (CE)</option>
+                                                                <option value="DF">Distrito Federal (DF)</option>
+                                                                <option value="ES">Espírito Santo (ES)</option>
+                                                                <option value="GO">Goiás (GO)</option>
+                                                                <option value="MA">Maranhão (MA)</option>
+                                                                <option value="MT">Mato Grosso (MT)</option>
+                                                                <option value="MS">Mato Grosso do Sul (MS)</option>
+                                                                <option value="MG">Minas Gerais (MG)</option>
+                                                                <option value="PA">Pará (PA)</option>
+                                                                <option value="PB">Paraíba (PB)</option>
+                                                                <option value="PR">Paraná (PR)</option>
+                                                                <option value="PE">Pernambuco (PE)</option>
+                                                                <option value="PI">Piauí (PI)</option>
+                                                                <option value="RJ">Rio de Janeiro (RJ)</option>
+                                                                <option value="RN">Rio Grande do Norte (RN)</option>
+                                                                <option value="RS">Rio Grande do Sul (RS)</option>
+                                                                <option value="RO">Rondônia (RO)</option>
+                                                                <option value="RR">Roraima (RR)</option>
+                                                                <option value="SC">Santa Catarina (SC)</option>
+                                                                <option value="SP">São Paulo (SP)</option>
+                                                                <option value="SE">Sergipe (SE)</option>
+                                                                <option value="TO">Tocantins (TO)</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>CEP</label>
+                                                            <input type="text" name="cep" class="form-control"
+                                                                placeholder="Digite seu CEP">
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>Rua</label>
+                                                            <input type="text" name="rua" class="form-control"
+                                                                placeholder="Digite sua rua">
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>Numero</label>
+                                                            <input type="text" name="numero" class="form-control"
+                                                                placeholder="Nº">
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>Possui Deficiência</label>
+                                                            <select id="inputState" name="possuiDeficiencia"
+                                                                class="form-control">
+                                                                <option selected>Selecione... </option>
+                                                                <option value="SIM">SIM</option>
+                                                                <option value="NÃO">NÃO</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>Tipo de Deficiência</label>
+                                                            <input type="text" name="tipoDeDeficiencia"
+                                                                class="form-control" placeholder="Digite a Deficiência">
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>Formação Acadêmica</label>
+                                                            <select id="inputState" name="formacaoAcademica"
+                                                                class="form-control">
+                                                                <option selected>Selecione...</option>
+                                                                <option value="Ensino Médio Completo">Ensino Médio
+                                                                    Completo</option>
+                                                                <option value="Ensino Médio Incompleto">Ensino Médio
+                                                                    Incompleto</option>
+                                                                <option value="Ensino técnico completo ou em curso">
+                                                                    Ensino técnico completo ou em curso</option>
+                                                                <option value="Ensino superior completo ou em curso">
+                                                                    Ensino superior completo ou em curso</option>
+                                                                <option value="Pós Graduação/Especialização">Pós
+                                                                    Graduação/Especialização</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>Experiência profissional</label>
+                                                            <textarea type="text" name="experienciaProfissional"
+                                                                class="form-control"
+                                                                placeholder="Digite a experiência profissional"></textarea>
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>Cursos extra curriculares</label>
+                                                            <input type="text" name="cursosExtracurriculares"
+                                                                class="form-control" placeholder="Digite os cursos">
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>Idiomas</label>
+                                                            <input type="text" name="idiomas" class="form-control"
+                                                                placeholder="Digite o idioma">
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>Informações adicionais</label>
+                                                            <textarea type="text" name="informacoesAdicionais"
+                                                                class="form-control"
+                                                                placeholder="Digite as informações adicionais"></textarea>
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>Pretenção salarial</label>
+                                                            <input type="text" name="pretencaoSalarial"
+                                                                class="form-control"
+                                                                placeholder="Digite a pretenção salarial">
+                                                        </div> 
+                                                        
+                                                        <div class="input-group mb-3 col-md-6">
+                                                            <label>Enviar curriculo </label>
+                                                            <input type="file" name="arquivo" placeholder="Carregar curriculo">
+                                                            <!-- <div class="input-group-prepend">
+                                                                <span class="input-group-text">Enviar</span>
+                                                            </div>
+                                                            <div class="custom-file">
+                                                                <input type="file" name="file" class="custom-file-input">
+                                                                <label class="custom-file-label">Enviar seu
+                                                                    curriculum</label>
+                                                            </div> -->
+                                                        </div>
+                                                    </div>
+                                                    <button class="btn btn-primary">Cadastrar</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--**********************************
+            Content body end
+        ***********************************-->
+
+
+                    <!--**********************************
+            Footer start
+        ***********************************-->
+                    <div class="footer">
+                        <div class="copyright">
+                            <p>Copyright © Designed &amp; Developed by <a href="#" target="_blank">TecHub</a> 2024</p>
+                        </div>
+                    </div>
+                    <!--**********************************
+            Footer end
+        ***********************************-->
+
+                    <!--**********************************
+           Support ticket button start
+        ***********************************-->
+
+                    <!--**********************************
+           Support ticket button end
+        ***********************************-->
+
+
+    </div>
+    <!--**********************************
+        Main wrapper end
+    ***********************************-->
+
+    <!--**********************************
+        Scripts
+    ***********************************-->
+    <!-- Required vendors -->
+    <script src="../dashBoard/vendor/global/global.min.js"></script>
+    <script src="../dashBoard/js/quixnav-init.js"></script>
+    <script src="../dashBoard/js/custom.min.js"></script>
+
+    <script src="../dashBoard/vendor/highlightjs/highlight.pack.min.js"></script>
+    <!-- Circle progress -->
+
+</body>
+
+</html>

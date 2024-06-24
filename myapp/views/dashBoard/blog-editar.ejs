@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>VOE - Admin Dashboard</title>
+    <!-- Favicon icon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="../../dashBoard/images/favicon.png">
+    <!-- Summernote -->
+    <link href="../../dashBoard/vendor/summernote/summernote.css" rel="stylesheet">
+    <link href="../../dashBoard/css/style.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <!--*******************
+        Preloader start
+    ********************-->
+    <div id="preloader">
+        <div class="sk-three-bounce">
+            <div class="sk-child sk-bounce1"></div>
+            <div class="sk-child sk-bounce2"></div>
+            <div class="sk-child sk-bounce3"></div>
+        </div>
+    </div>
+    <!--*******************
+        Preloader end
+    ********************-->
+
+
+    <!--**********************************
+        Main wrapper start
+    ***********************************-->
+    <div id="main-wrapper">
+
+        <!--**********************************
+            Nav header start
+        ***********************************-->
+        <%- include('./partials/nav-header') %>
+        <!--**********************************
+            Nav header end
+        ***********************************-->
+
+        <!--**********************************
+            Header start
+        ***********************************-->
+        <%- include('./partials/header') %>
+        <!--**********************************
+            Header end ti-comment-alt
+        ***********************************-->
+
+        <!--**********************************
+            Sidebar start
+        ***********************************-->
+        <%- include('./partials/sidebar') %>
+        <!--**********************************
+            Sidebar end
+        ***********************************-->
+
+        <!--**********************************
+            Content body start
+        ***********************************-->
+        <div class="content-body">
+            <div class="container-fluid">
+                <div class="row page-titles mx-0">
+                    <div class="col-sm-6 p-md-0">
+                        <div class="welcome-text">
+                            <h4>Olá, {nome}</h4>
+                            <p class="mb-0">Edite aqui o post do blog</p>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="javascript:void(0)">DashBoard</a></li>
+                            <li class="breadcrumb-item active"><a href="javascript:void(0)">Novo Post</a></li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Editar Postagem | <%=postagemBlog.id%></h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="basic-form">
+                                    <form method="POST" action="/admin/blog-edita/<%=postagemBlog.id%>">
+                                        <div class="form-row">
+                                            <div class="form-group col-md-4">
+                                                <label>Titulo</label>
+                                                <input type="text" name="titulo" value="<%=postagemBlog.titulo%>" class="form-control" placeholder="Qual o titulo da postagem">
+                                            </div>
+                                            <div class="form-group col-md-4">
+                                                <label>Categoria</label>
+                                                <input type="text" name="categoria" value="<%=postagemBlog.categoria%>" class="form-control" placeholder="Qual a categoria">
+                                            </div>
+                                            <div class="form-group col-md-4">
+                                                <label>Autor</label>
+                                                <input type="text" name="autor" value="<%=postagemBlog.autor%>" class="form-control" placeholder="Qual o autor do post">
+                                            </div>
+                                            <div class="form-group col-md-12">
+                                                <label>Conteudo</label>
+                                                <textarea type="text-area" name="conteudo" value="<%=postagemBlog.conteudo%>" class="summernote" placeholder="Digite aqui o conteúdo da postagem"><%=postagemBlog.conteudo%></textarea>
+                                            </div>
+                                            
+                                        </div>
+                                        
+                                        
+                                        <button type="submit" class="btn btn-primary">Editar</button>
+                                        <button class="btn btn-secondary"><a class="text-white" href="/admin/blog-posts">voltar</a></button>
+                                    </form>
+                                    <br>                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--**********************************
+            Content body end
+        ***********************************-->
+
+
+        <!--**********************************
+            Footer start
+        ***********************************-->
+        <div class="footer">
+            <div class="copyright">
+                <p>Copyright © Designed &amp; Developed by <a href="#" target="_blank">Quixkit</a> 2019</p>
+            </div>
+        </div>
+        <!--**********************************
+            Footer end
+        ***********************************-->
+
+        <!--**********************************
+           Support ticket button start
+        ***********************************-->
+
+        <!--**********************************
+           Support ticket button end
+        ***********************************-->
+
+
+    </div>
+    <!--**********************************
+        Main wrapper end
+    ***********************************-->
+
+    <!--**********************************
+        Scripts
+    ***********************************-->
+    <!-- Required vendors -->
+    <script src="../../dashBoard/vendor/global/global.min.js"></script>
+    <script src="../../dashBoard/js/quixnav-init.js"></script>
+    <script src="../../dashBoard/js/custom.min.js"></script>
+
+    <script src="../../dashBoard/vendor/highlightjs/highlight.pack.min.js"></script>
+    <!-- Circle progress -->
+      <!-- Summernote -->
+      <script src="../../dashBoard/vendor/summernote/js/summernote.min.js"></script>
+      <!-- Summernote init -->
+      <script src="../../dashBoard/js/plugins-init/summernote-init.js"></script>
+  
+
+</body>
+
+</html>

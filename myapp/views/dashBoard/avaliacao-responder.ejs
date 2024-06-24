@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Responder Avaliação</title>
+  <!-- Favicon icon -->
+  <link rel="icon" type="image/png" sizes="16x16" href="../../dashBoard/images/favicon.png">
+  <link href="../../dashBoard/css/style.css" rel="stylesheet">
+</head>
+
+<body>
+  <div id="main-wrapper">
+    
+    <div class="content-body">
+      <div class="container">
+        <div class="col-lg-9 page-titles mx-0">
+          <div class=" col-sm-6 ">
+            <div class="welcome-text">
+              <h4>Responder Avaliação</h4>
+              <p style="color: black;" class="mb-0">Responda as perguntas abaixo</p>
+            </div>
+          </div>
+          <!-- <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="javascript:void(0)">DashBoard</a></li>
+              <li class="breadcrumb-item active"><a href="javascript:void(0)">Responder Avaliação</a></li>
+            </ol>
+          </div> -->
+        </div>
+        <div class="row">
+          <div class="col-lg-9 justify-content-center">
+            <div class="card">
+              <!-- <div class="card-header">
+                <h4 class="card-title">Responder Avaliação</h4>
+              </div> -->
+              <div class="card-body">
+                <div class="basic-form">
+                  <form id="avaliacaoForm" action="/admin/avaliacao-responder/Teste Pisicológico" method="post">
+                    <h2>Responder Avaliação</h2>
+                    <input type="hidden" id="avaliacaoNome" name="avaliacao_nome" value="Teste Pisicológico">
+            
+                    <!-- Campo para selecionar a vaga -->
+                    <label for="vaga_cargo">Selecione a Vaga:</label>
+                    <select id="vaga_cargo" name="vaga_cargo">
+                        <!-- As opções serão carregadas dinamicamente -->
+                    </select>
+                    
+                    <!-- Perguntas da avaliação -->
+                    <div id="perguntas">
+                        <!-- As perguntas serão carregadas dinamicamente -->
+                    </div>
+            
+                    <button type="submit">Enviar Respostas</button>
+                </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- <div class="footer">
+      <div class="copyright">
+        <p>Copyright © Designed &amp; Developed by <a href="#" target="_blank">Quixkit</a> 2019</p>
+      </div>
+    </div> -->
+  </div>
+  <script src="../../dashBoard/vendor/global/global.min.js"></script>
+  <script src="../../dashBoard/js/quixnav-init.js"></script>
+  <script src="../../dashBoard/js/custom.min.js"></script>
+  <script src="../../dashBoard/vendor/highlightjs/highlight.pack.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            // Carregar as vagas disponíveis
+            const vagasResponse = await fetch('/admin/api/vagas');
+            const vagas = await vagasResponse.json();
+            const vagaSelect = document.getElementById('vaga_cargo');
+
+            // Certifique-se de que há vagas retornadas e as adicione ao select
+            if (vagas.length) {
+                vagas.forEach(vaga => {
+                    const option = document.createElement('option');
+                    option.value = vaga.cargo;
+                    option.textContent = vaga.cargo;
+                    vagaSelect.appendChild(option);
+                });
+            } else {
+                const option = document.createElement('option');
+                option.textContent = 'Nenhuma vaga encontrada';
+                vagaSelect.appendChild(option);
+            }
+
+            // Carregar as perguntas da avaliação
+            const avaliacaoNome = document.getElementById('avaliacaoNome').value;
+            const perguntasResponse = await fetch(`/admin/api/avaliacoes/${avaliacaoNome}/perguntas`);
+            const perguntas = await perguntasResponse.json();
+            const perguntasDiv = document.getElementById('perguntas');
+            perguntas.forEach(pergunta => {
+                const perguntaDiv = document.createElement('div');
+                perguntaDiv.innerHTML = `
+                    <h3>${pergunta.texto}</h3>
+                    <input type="hidden" name="respostas[${pergunta.id}][pergunta_id]" value="${pergunta.id}">
+                    <label for="respostas[${pergunta.id}][texto]">Resposta:</label>
+                    <input type="text" name="respostas[${pergunta.id}][texto]" id="respostas[${pergunta.id}][texto]">
+                `;
+                perguntasDiv.appendChild(perguntaDiv);
+            });
+        } catch (error) {
+            console.error('Erro ao carregar vagas ou perguntas:', error);
+        }
+    });
+</script>
+
+</body>
+
+</html>
