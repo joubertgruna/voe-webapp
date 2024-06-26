@@ -1,0 +1,10 @@
+{
+    "name": "Voe WebApp",
+    "short_name": "VoeApp",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#000000"
+    
+  }
+  

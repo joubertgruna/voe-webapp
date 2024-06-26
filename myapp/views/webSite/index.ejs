@@ -10,6 +10,19 @@
 	<meta name="author" content="https://instagram.com/joubertgruna">
 
 	<title>VOE</title>
+	<link rel="manifest" href="../webSite/manifest.json">
+
+	<script>
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker.register('../webSite/service-worker.js')
+				.then(registration => {
+					console.log('Service Worker registered with scope:', registration.scope);
+				})
+				.catch(error => {
+					console.error('Service Worker registration failed:', error);
+				});
+		}
+	</script>
 
 	<!-- bootstrap.min css -->
 	<link rel="stylesheet" href="../webSite/plugins/bootstrap/css/bootstrap.min.css">
@@ -23,6 +36,8 @@
 
 	<!-- Main Stylesheet -->
 	<link rel="stylesheet" href="../webSite/css/style.css">
+
+
 
 </head>
 
@@ -456,6 +471,7 @@
     =====================================-->
 
 		<%- include('./partials/scripts')%>
+
 
 </body>
 
