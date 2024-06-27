@@ -9,7 +9,7 @@ const { v4: uuidv4 } = require('uuid');
 const session = require('express-session');
 
 router.use(session({
-  secret: 'voeKey',
+  secret: 'voekey',
   resave: false,
   saveUninitialized: true,
   cookie: { secure: false } // Use true se estiver usando HTTPS
