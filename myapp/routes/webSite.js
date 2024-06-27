@@ -79,9 +79,6 @@ router.get('/vagas-single/:id', async (req, res) => {
 });
 
 
-
-
-
 router.get('/projetos', (req, res) => {
   res.render('./webSite/project')
 })

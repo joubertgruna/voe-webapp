@@ -73,7 +73,6 @@ router.get('/', verificaAutenticacao, function (req, res, next) {
   }
 });
 
-
 /**ROTAS DO MODULO - CANDIDATO **/
 /* POST Criar candidatos destino. */
 router.post('/candidatos-cad', (req, res) => { 
