@@ -91,9 +91,9 @@
                                             <div class="col-lg-12">
                                                 <div class="card">
                                                     <div class="card-header d-block">
-                                                        <h4 class="card-title">Vagas</h4>
-                                                        <p class="m-0 subtitle">Veja as vagas e seus respectivos
-                                                            candidatos</p>
+                                                        <h4 class="card-title"><strong>Vagas</strong></h4>
+                                                        <p class="m-0 subtitle text-dark"><strong>Visualise as vagas e seus respectivos candidatos</strong></p>
+                                                            <hr>
                                                     </div>
                                                     <div class="card-body">
                                                         <div id="accordion-six" class="accordion accordion-with-icon">
@@ -102,13 +102,12 @@
                                                                     <div class="accordion__header collapsed"
                                                                         data-toggle="collapse"
                                                                         data-target="#with-icon_collapse<%= index %>">
-                                                                        <span class="accordion__header--icon"></span>
+                                                                        <span style="color: #ffaa16;" class="accordion__header--icon"></span>
                                                                         <span class="accordion__header--text">
                                                                            <strong>Vaga:</strong> <%= vaga.cargo %> - <strong>Empresa:</strong>  <%= vaga.empresa %>
                                                                         </span>
-                                                                        <span
-                                                                            class="accordion__header--indicator indicator_bordered"></span>
-                                                                            <span><a class="btn btn-sm btn-transparent"
+                                                                        <strong><span style="color: #ffaa16;"  class="accordion__header--indicator indicator_bordered"></span></strong>
+                                                                            <span ><a style="color: #ffaa16;" class="btn btn-sm btn-transparent"
                                                                                 type="submit"
                                                                                 href="/admin/vagas-editar/<%=vaga.id%>"
                                                                                 class="" data-toggle="tooltip"
@@ -120,15 +119,18 @@
                                                                         data-parent="#accordion-six">
                                                                         <div class="accordion__body--text">
                                                                             <% if (vaga.candidatos.length === 0) { %>
-                                                                                <p>Sem candidatos até o momento</p>
+                                                                                <div class="text-center text-dark">
+                                                                                    <p><strong>Sem candidatos até o momento</strong></p>
+                                                                                </div>
+                                                                                
                                                                             <% } else { %>
-                                                                                <table id="table-<%= index %>" class="display" style="min-width: 845px">
+                                                                                <table id="table-<%= index %>" class="display text-left" style="min-width: 845px">
                                                                                     <thead>
                                                                                         <tr>
                                                                                             <th>ID</th>
                                                                                             <th>Nome</th>
                                                                                             <th>Email</th>
-                                                                                            <th>Ação</th>
+                                                                                            <th class="text-center">Ações</th>
                                                                                         </tr>
                                                                                     </thead>
                                                                                     <tbody style="color: black;">
@@ -137,9 +139,11 @@
                                                                                                 <td><%= candidato.id %></td>
                                                                                                 <td><%= candidato.nome %></td>
                                                                                                 <td><%= candidato.email %></td>
-                                                                                                <td>
-                                                                                                    <a href="/admin/candidatos-editar/<%= candidato.id %>" class="btn btn-primary btn-sm">Perfil</a>
-                                                                                                    <button class="btn btn-secondary btn-sm" onclick="visualizarCurriculo('<%= candidato.file %>', '<%= candidato.id %>')">Currículo</button>
+                                                                                                <td class="text-center">
+                                                                                                    <a href="/admin/candidatos-editar/<%= candidato.id %>" class="btn btn-sm "><i
+                                                                                                        class="fa fa-user color-danger" style="font-size: 18px;"></i></a>
+                                                                                                    <button class="btn" onclick="visualizarCurriculo('<%= candidato.file %>', '<%= candidato.id %>')"><i
+                                                                                                        class="fa fa-file-pdf-o color-danger" style="font-size: 18px;"></i></button>
                                                                                                     <% if (candidato.auditado) { %>
                                                                                                         <span id="check-icon-<%= candidato.id %>" class="check-icon">&#x2714;</span>
                                                                                                     <% } else { %>
@@ -166,7 +170,7 @@
                                             <!-- CSS para o sinal de check -->
                                             <style>
                                                 .check-icon {
-                                                    color: green;
+                                                    color: #ffaa16;
                                                     font-size: 1.2em;
                                                     margin-left: 10px;
                                                 }
