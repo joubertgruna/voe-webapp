@@ -478,6 +478,7 @@ router.get('/vagas-todas', verificaAutenticacao, async function (req, res, next)
         'vagas.id as vagaId',
         'vagas.cargo as vagaCargo',
         'vagas.descricao as vagaDescricao',
+        'vagas.empresa as empresa',
         'candidatos.id as candidatoId',
         'candidatos.nome as candidatoNome',
         'candidatos.email as candidatoEmail',
@@ -487,7 +488,7 @@ router.get('/vagas-todas', verificaAutenticacao, async function (req, res, next)
 
     // Agrupar as vagas e candidatos para o front-end
     const vagasComCandidatos = postagemVagas.reduce((acc, curr) => {
-      const { vagaId, vagaCargo, vagaDescricao, candidatoId, candidatoNome, candidatoEmail, candidatoFile, candidatoAuditado } = curr;
+      const { vagaId, vagaCargo, empresa, vagaDescricao, candidatoId, candidatoNome, candidatoEmail, candidatoFile, candidatoAuditado } = curr;
 
       // Se a vaga ainda não foi adicionada ao objeto de retorno
       if (!acc[vagaId]) {
@@ -495,6 +496,7 @@ router.get('/vagas-todas', verificaAutenticacao, async function (req, res, next)
           id: vagaId,
           cargo: vagaCargo,
           descricao: vagaDescricao,
+          empresa: empresa,
           candidatos: [],
         };
       }
@@ -534,8 +536,6 @@ router.post('/candidatos/auditado/:id', async (req, res) => {
   }
 });
 
-
-
 /* GET create vagas page. */
 router.get('/vagas-nova', verificaAutenticacao, function (req, res, next) {
   res.render('./dashBoard/vagas-nova', { title: 'Express' });
@@ -547,7 +547,7 @@ router.get('/vagas-editar/:id', verificaAutenticacao, function (req, res, next) 
     const postagemVaga = knex.select('*').from('vagas').where({ id: id }).first();
     postagemVaga.then((postagemVaga) => {
       if (postagemVaga) {
-        console.log('Vaga encontrada:', postagemVaga);
+        // console.log('Vaga encontrada:', postagemVaga);
       } else {
         console.log('Nenhuma vaga encontrado com o ID fornecido.');
       }
@@ -657,7 +657,7 @@ router.post('/vagas-cadastro', (req, res) => {
         status: status,
         data_publicacao: validate.created_at
       }).then((validate) => {
-        console.log('Vaga criada com sucesso!', [validate]);
+        // console.log('Vaga criada com sucesso!', [validate]);
       })
     } catch (error) {
       console.error('Erro ao inserir a vaga:', error);
@@ -847,7 +847,6 @@ router.get('/avaliacao-responder/:test_name', async function (req, res, next) {
 });
 
 
-// Rota para obter todas as vagas
 // Rota para obter todas as vagas
 router.get('/api/vagas', verificaAutenticacao, async (req, res) => {
   try {

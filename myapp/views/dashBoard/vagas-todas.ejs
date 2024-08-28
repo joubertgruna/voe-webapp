@@ -104,10 +104,16 @@
                                                                         data-target="#with-icon_collapse<%= index %>">
                                                                         <span class="accordion__header--icon"></span>
                                                                         <span class="accordion__header--text">
-                                                                            <%= vaga.cargo %> - <%= vaga.empresa %>
+                                                                           <strong>Vaga:</strong> <%= vaga.cargo %> - <strong>Empresa:</strong>  <%= vaga.empresa %>
                                                                         </span>
                                                                         <span
                                                                             class="accordion__header--indicator indicator_bordered"></span>
+                                                                            <span><a class="btn btn-sm btn-transparent"
+                                                                                type="submit"
+                                                                                href="/admin/vagas-editar/<%=vaga.id%>"
+                                                                                class="" data-toggle="tooltip"
+                                                                                data-placement="top" title="Editar vaga"><i
+                                                                                    class="fa fa-pencil color-muted"></i></a></span>
                                                                     </div>
                                                                     <div id="with-icon_collapse<%= index %>"
                                                                         class="collapse accordion__body"
