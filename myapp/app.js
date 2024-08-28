@@ -9,7 +9,6 @@ const fileUpload = require('express-fileupload');
 var indexRouter = require('./routes/index');
 var webSiteRouter = require('./routes/webSite');
 
-
 var app = express();
 
 // view engine setup

@@ -204,7 +204,7 @@
 
       document.getElementById('feedback').innerHTML = '<div class="alert alert-info">Perguntas enviadas com sucesso!</div>';
 
-      const response = await fetch('/admin/avaliacao-cadastrar', {
+      const response = await fetch('/admin/questions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

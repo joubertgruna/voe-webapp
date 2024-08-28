@@ -16,8 +16,8 @@
     
     <div class="content-body">
       <div class="container">
-        <div class="col-lg-9 page-titles mx-0">
-          <div class=" col-sm-6 ">
+        <div class="row page-titles mx-0">
+          <div class="col-sm-6 p-md-0">
             <div class="welcome-text">
               <h4>Responder Avaliação</h4>
               <p style="color: black;" class="mb-0">Responda as perguntas abaixo</p>
@@ -38,23 +38,37 @@
               </div> -->
               <div class="card-body">
                 <div class="basic-form">
-                  <form id="avaliacaoForm" action="/admin/avaliacao-responder/Teste Pisicológico" method="post">
-                    <h2>Responder Avaliação</h2>
-                    <input type="hidden" id="avaliacaoNome" name="avaliacao_nome" value="Teste Pisicológico">
-            
-                    <!-- Campo para selecionar a vaga -->
-                    <label for="vaga_cargo">Selecione a Vaga:</label>
-                    <select id="vaga_cargo" name="vaga_cargo">
-                        <!-- As opções serão carregadas dinamicamente -->
-                    </select>
-                    
-                    <!-- Perguntas da avaliação -->
-                    <div id="perguntas">
-                        <!-- As perguntas serão carregadas dinamicamente -->
+                  <form style="color: black;" id="responderForm" action="/admin/avaliacao-responder/<%= perguntas[0].test_id %>" method="POST">
+                    <input type="hidden" name="candidato_id" value="<%= candidato_id %>">
+                    <div id="questionsContainer">
+                      <% perguntas.forEach(function(pergunta, index) { %>
+                        <% if (pergunta.type === 'open') { %>
+                          <div class="form-group">
+                            <label>Pergunta <%= index + 1 %>:</label>
+                            <p><%= pergunta.text %></p>
+                            <textarea name="respostas[<%= index %>][texto]" class="form-control" required></textarea>
+                            <input type="hidden" name="respostas[<%= index %>][tipo]" value="open">
+                          </div>
+                          
+                        <% } else if (pergunta.type === 'multiple_choice') { %>
+                          <div class="form-group">
+                            <label>Pergunta <%= index + 1 %>:</label>
+                            <p><%= pergunta.text %></p>
+                            <% JSON.parse(pergunta.options).forEach(function(option, optionIndex) { %>
+                              <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="respostas[<%= index %>][opcoes][]" value="<%= option %>">
+                                <label class="form-check-label"><%= option %></label>
+                              </div>
+                            <% }); %>
+                            <input type="hidden" name="respostas[<%= index %>][tipo]" value="multiple_choice">
+                          </div>
+                          <hr>
+                        <% } %>
+                      <% }); %>
                     </div>
-            
-                    <button type="submit">Enviar Respostas</button>
-                </form>
+                    <button type="submit" class="btn btn-success">Enviar Respostas</button>
+                    <a href="/admin/avaliacoes-todas" class="btn btn-secondary">Cancelar</a>
+                  </form>
                 </div>
               </div>
             </div>
@@ -72,49 +86,6 @@
   <script src="../../dashBoard/js/quixnav-init.js"></script>
   <script src="../../dashBoard/js/custom.min.js"></script>
   <script src="../../dashBoard/vendor/highlightjs/highlight.pack.min.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        try {
-            // Carregar as vagas disponíveis
-            const vagasResponse = await fetch('/admin/api/vagas');
-            const vagas = await vagasResponse.json();
-            const vagaSelect = document.getElementById('vaga_cargo');
-
-            // Certifique-se de que há vagas retornadas e as adicione ao select
-            if (vagas.length) {
-                vagas.forEach(vaga => {
-                    const option = document.createElement('option');
-                    option.value = vaga.cargo;
-                    option.textContent = vaga.cargo;
-                    vagaSelect.appendChild(option);
-                });
-            } else {
-                const option = document.createElement('option');
-                option.textContent = 'Nenhuma vaga encontrada';
-                vagaSelect.appendChild(option);
-            }
-
-            // Carregar as perguntas da avaliação
-            const avaliacaoNome = document.getElementById('avaliacaoNome').value;
-            const perguntasResponse = await fetch(`/admin/api/avaliacoes/${avaliacaoNome}/perguntas`);
-            const perguntas = await perguntasResponse.json();
-            const perguntasDiv = document.getElementById('perguntas');
-            perguntas.forEach(pergunta => {
-                const perguntaDiv = document.createElement('div');
-                perguntaDiv.innerHTML = `
-                    <h3>${pergunta.texto}</h3>
-                    <input type="hidden" name="respostas[${pergunta.id}][pergunta_id]" value="${pergunta.id}">
-                    <label for="respostas[${pergunta.id}][texto]">Resposta:</label>
-                    <input type="text" name="respostas[${pergunta.id}][texto]" id="respostas[${pergunta.id}][texto]">
-                `;
-                perguntasDiv.appendChild(perguntaDiv);
-            });
-        } catch (error) {
-            console.error('Erro ao carregar vagas ou perguntas:', error);
-        }
-    });
-</script>
-
 </body>
 
 </html>

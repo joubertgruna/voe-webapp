@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<ConsultarNfseResposta xmlns:ns2="http://www.w3.org/2000/09/xmldsig#">
+    <ListaNfse>
+        <CompNfse>
+            <Nfse>
+                <InfNfse>
+                    <Numero>202400000000359</Numero>
+                    <CodigoVerificacao>PJA0L2XEN</CodigoVerificacao>
+                    <DataEmissao>2024-05-16T14:13:53.100-03:00</DataEmissao>
+                    <IdentificacaoRps/>
+                    <NaturezaOperacao>1</NaturezaOperacao>
+                    <OptanteSimplesNacional>1</OptanteSimplesNacional>
+                    <Competencia>2024-05-01</Competencia>
+                    <Servico>
+                        <Valores>
+                            <ValorServicos>8160</ValorServicos>
+                            <ValorDeducoes>0.00</ValorDeducoes>
+                            <IssRetido>2</IssRetido>
+                            <ValorIss>0.00</ValorIss>
+                            <BaseCalculo>8160</BaseCalculo>
+                            <Aliquota>2.01</Aliquota>
+                            <ValorLiquidoNfse>8160</ValorLiquidoNfse>
+                            <DescontoCondicionado>0.00</DescontoCondicionado>
+                            <DescontoIncondicionado>0.00</DescontoIncondicionado>
+                        </Valores>
+                        <ItemListaServico>0416</ItemListaServico>
+                        <Discriminacao>{[[Descricao=Referente as cartas de rede:
+N94599243
+N94691930
+N94691931
+N94691928
+N94518452
+N95100873
+N95100871][ItemServico=0416][Quantidade=1][ValorUnitario=8160][ValorServico=8160][ValorBaseCalculo=8160][Aliquota=2.01][Deducoes=0][DescontoCondicionado=0][DescontoIncondicionado=0]]}</Discriminacao>
+                        <CodigoMunicipio>3118304</CodigoMunicipio>
+                    </Servico>
+                    <PrestadorServico>
+                        <IdentificacaoPrestador>
+                            <Cnpj>48592734000133</Cnpj>
+                            <InscricaoMunicipal>802949</InscricaoMunicipal>
+                        </IdentificacaoPrestador>
+                        <RazaoSocial>BRINCADEIRAS DE CRIANCA: NUCLEO DE PSICOLOGIA INFANTIL LTDA</RazaoSocial>
+                        <NomeFantasia>BRINCADEIRAS DE CRIANCA: NUCLEO DE PSICOLOGIA INFANTIL</NomeFantasia>
+                        <Endereco>
+                            <Endereco>R Dom Silvério</Endereco>
+                            <Numero>117</Numero>
+                            <Bairro>Museu</Bairro>
+                            <CodigoMunicipio>3118304</CodigoMunicipio>
+                            <Cep>36400202</Cep>
+                        </Endereco>
+                        <Contato>
+                            <Telefone>3137211680</Telefone>
+                            <Email>lercontabilidade@yahoo.com.br</Email>
+                        </Contato>
+                    </PrestadorServico>
+                    <TomadorServico>
+                        <IdentificacaoTomador>
+                            <CpfCnpj>
+                                <Cnpj>62550256001606</Cnpj>
+                            </CpfCnpj>
+                            <InscricaoMunicipal>309188</InscricaoMunicipal>
+                        </IdentificacaoTomador>
+                        <RazaoSocial>NOTRE DAME INTERMEDICA MINAS GERAIS SAUDE S.A</RazaoSocial>
+                        <Endereco>
+                            <Endereco>R MINISTRO OROZIMBO NONATO</Endereco>
+                            <Numero>102</Numero>
+                            <Complemento>TORRE B 24 ANDAR SALA 2401 2403 2405 E2407</Complemento>
+                            <Bairro>VILA DA SERRA</Bairro>
+                            <CodigoMunicipio>3144805</CodigoMunicipio>
+                            <Uf>MG</Uf>
+                            <Cep>34006053</Cep>
+                        </Endereco>
+                        <Contato/>
+                    </TomadorServico>
+                    <IntermediarioServico/>
+                    <ConstrucaoCivil/>
+                    <CondicaoPagamento>
+                        <Condicao>1</Condicao>
+                        <QtdParcela>1</QtdParcela>
+                        <Parcelas>
+                            <Parcela>1</Parcela>
+                            <Valor>8160</Valor>
+                        </Parcelas>
+                    </CondicaoPagamento>
+                </InfNfse>
+            </Nfse>
+            <NfseCancelamento>
+                <Confirmacao>
+                    <Pedido>
+                        <InfPedidoCancelamento/>
+                        <ns2:Signature/>
+                    </Pedido>
+                    <InfConfirmacaoCancelamento>
+                        <Sucesso>false</Sucesso>
+                    </InfConfirmacaoCancelamento>
+                </Confirmacao>
+            </NfseCancelamento>
+            <NfseSubstituicao>
+                <SubstituicaoNfse/>
+            </NfseSubstituicao>
+        </CompNfse>
+    </ListaNfse>
+    <ListaMensagemRetorno/>
+</ConsultarNfseResposta>
