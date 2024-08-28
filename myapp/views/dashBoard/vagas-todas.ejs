@@ -127,6 +127,7 @@
                                                                                             </tr>
                                                                                         </thead>
                                                                                         <tbody style="color: black;">
+                                                                                            <!-- Atualização no código EJS -->
                                                                                             <%
                                                                                                 vaga.candidatos.forEach(candidato=>
                                                                                                 { %>
@@ -143,22 +144,30 @@
                                                                                                         <%= candidato.email
                                                                                                             %>
                                                                                                     </td>
-                                                                                                    
-
                                                                                                     <td>
-                                                                                                        <!-- Link para o perfil do candidato -->
                                                                                                         <a href="/admin/candidatos-editar/<%= candidato.id %>"
                                                                                                             class="btn btn-primary btn-sm">Perfil</a>
-                                                                                                        <!-- Botão para visualizar o currículo -->
-                                                                                                        <!-- Atualização no código EJS -->
-                                                                                                        <!-- Adicione um botão para visualizar o currículo -->
                                                                                                         <button
                                                                                                             class="btn btn-secondary btn-sm"
-                                                                                                            onclick="visualizarCurriculo('<%= candidato.file %>')">Currículo</button>
-
+                                                                                                            onclick="visualizarCurriculo('<%= candidato.file %>', '<%= candidato.id %>')">Currículo</button>
+                                                                                                        <!-- Adicione um sinal de check se o currículo foi auditado -->
+                                                                                                        <% if
+                                                                                                            (candidato.auditado)
+                                                                                                            { %>
+                                                                                                            <span
+                                                                                                                id="check-icon-<%= candidato.id %>"
+                                                                                                                class="check-icon">&#x2714;</span>
+                                                                                                            <% } else {
+                                                                                                                %>
+                                                                                                                <span
+                                                                                                                    id="check-icon-<%= candidato.id %>"
+                                                                                                                    class="check-icon"
+                                                                                                                    style="display: none;">&#x2714;</span>
+                                                                                                                <% } %>
                                                                                                     </td>
                                                                                                 </tr>
                                                                                                 <% }) %>
+
                                                                                         </tbody>
                                                                                     </table>
                                                                                     <% } %>
@@ -171,23 +180,49 @@
                                                 </div>
                                             </div>
                                             <!-- Column ends -->
-                                            <!-- Modal para visualizar o currículo -->
+
+                                            <!-- CSS para o sinal de check -->
+                                            <style>
+                                                .check-icon {
+                                                    color: green;
+                                                    font-size: 1.2em;
+                                                    margin-left: 10px;
+                                                }
+
+                                                /* CSS para o modal */
+                                                .modal-dialog {
+                                                    max-width: 70%;
+                                                    margin: auto auto;
+                                                }
+
+                                                .modal-content {
+                                                    height: 80vh;
+                                                    /* Ajuste conforme necessário */
+                                                }
+
+                                                #curriculoFrame {
+                                                    width: 100%;
+                                                    height: 100%;
+                                                    /* border: none; */
+                                                }
+                                            </style>
+
+                                            <!-- Modal HTML -->
                                             <div class="modal fade" id="curriculoModal" tabindex="-1" role="dialog"
                                                 aria-labelledby="curriculoModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog modal-lg" role="document">
+                                                <div class="modal-dialog" role="document">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title" id="curriculoModalLabel">Visualizar
-                                                                Currículo</h5>
+                                                            <h5 class="modal-title" id="curriculoModalLabel">Currículo
+                                                                do Candidato</h5>
                                                             <button type="button" class="close" data-dismiss="modal"
                                                                 aria-label="Close">
                                                                 <span aria-hidden="true">&times;</span>
                                                             </button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <!-- Iframe para exibir o documento -->
-                                                            <iframe id="curriculoFrame" src=""
-                                                                style="width:100%; height:500px;"
+                                                            <iframe id="curriculoFrame"
+                                                                style="width: 100%; height: 500px;"
                                                                 frameborder="0"></iframe>
                                                         </div>
                                                         <div class="modal-footer">
@@ -197,6 +232,7 @@
                                                     </div>
                                                 </div>
                                             </div>
+
 
 
 
@@ -325,15 +361,49 @@
     <script src="../dashBoard/vendor/datatables/js/jquery.dataTables.min.js"></script>
     <script src="../dashBoard/js/plugins-init/datatables.init.js"></script>
 
-    <!-- JavaScript para abrir o modal e exibir o currículo -->
-    <script>
+    <!-- <script>
         function visualizarCurriculo(caminhoArquivo) {
             const modal = $('#curriculoModal');
             const iframe = document.getElementById('curriculoFrame');
             iframe.src = caminhoArquivo; // Define o caminho do arquivo no iframe
             modal.modal('show'); // Abre o modal
         }
+    </script> -->
+    <script>
+        function visualizarCurriculo(caminhoArquivo, candidatoId) {
+            // Atualiza o campo auditado no servidor
+            fetch(`/admin/candidatos/auditado/${candidatoId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Atualiza o iframe com o currículo
+                        const iframe = document.getElementById('curriculoFrame');
+                        iframe.src = caminhoArquivo; // Define o caminho do arquivo no iframe
+
+                        // Atualiza o estado do check-icon
+                        const checkIcon = document.querySelector(`#check-icon-${candidatoId}`);
+                        if (checkIcon) {
+                            checkIcon.style.display = 'inline'; // Exibe o check-icon
+                        }
+
+                        // Abre o modal
+                        $('#curriculoModal').modal('show');
+                    } else {
+                        console.error('Erro ao atualizar candidato');
+                    }
+                })
+                .catch(error => console.error('Erro:', error));
+        }
     </script>
+
+
+
+
 
 </body>
 

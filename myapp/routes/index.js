@@ -476,19 +476,18 @@ router.get('/vagas-todas', verificaAutenticacao, async function (req, res, next)
       .leftJoin('candidatos', 'vagas.cargo', 'candidatos.vaga_aplicada') // Join baseado no campo 'cargo'
       .select(
         'vagas.id as vagaId',
-        'vagas.cargo as vagaCargo', // Campo 'cargo'
+        'vagas.cargo as vagaCargo',
         'vagas.descricao as vagaDescricao',
         'candidatos.id as candidatoId',
         'candidatos.nome as candidatoNome',
         'candidatos.email as candidatoEmail',
-        'candidatos.caminho_arquivo as candidatoFile' // Corrigido para 'candidatoFile'
+        'candidatos.caminho_arquivo as candidatoFile',
+        'candidatos.auditado as candidatoAuditado' // Adicione o campo 'auditado'
       );
-
-    console.log('XX::', postagemVagas);
 
     // Agrupar as vagas e candidatos para o front-end
     const vagasComCandidatos = postagemVagas.reduce((acc, curr) => {
-      const { vagaId, vagaCargo, vagaDescricao, candidatoId, candidatoNome, candidatoEmail, candidatoFile } = curr;
+      const { vagaId, vagaCargo, vagaDescricao, candidatoId, candidatoNome, candidatoEmail, candidatoFile, candidatoAuditado } = curr;
 
       // Se a vaga ainda não foi adicionada ao objeto de retorno
       if (!acc[vagaId]) {
@@ -506,7 +505,8 @@ router.get('/vagas-todas', verificaAutenticacao, async function (req, res, next)
           id: candidatoId,
           nome: candidatoNome,
           email: candidatoEmail,
-          file: candidatoFile // Utilizando a variável correta
+          file: candidatoFile,
+          auditado: candidatoAuditado // Adicione a propriedade 'auditado'
         });
       }
 
@@ -515,13 +515,25 @@ router.get('/vagas-todas', verificaAutenticacao, async function (req, res, next)
 
     res.render('./dashBoard/vagas-todas', {
       title: 'Express',
-      vagas: Object.values(vagasComCandidatos) // Converte o objeto para um array para facilitar a renderização no front-end
+      vagas: Object.values(vagasComCandidatos)
     });
   } catch (error) {
     console.error('Erro ao listar as vagas:', error);
     res.status(500).send('Erro ao listar as vagas.');
   }
 });
+
+// Rota para atualizar o status de auditado
+router.post('/candidatos/auditado/:id', async (req, res) => {
+  const candidatoId = req.params.id;
+  try {
+      await knex('candidatos').where('id', candidatoId).update({ auditado: 1 });
+      res.json({ success: true });
+  } catch (error) {
+      res.status(500).json({ error: 'Erro ao atualizar candidato' });
+  }
+});
+
 
 
 /* GET create vagas page. */
