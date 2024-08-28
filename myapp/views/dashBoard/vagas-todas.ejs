@@ -9,8 +9,8 @@
     <title>VOE - Listagem de Vagas </title>
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="./images/favicon.png">
-     <!-- Datatable -->
-     <link href="../dashBoard/vendor/datatables/css/jquery.dataTables.min.css" rel="stylesheet">
+    <!-- Datatable -->
+    <link href="../dashBoard/vendor/datatables/css/jquery.dataTables.min.css" rel="stylesheet">
     <link href="../dashBoard/css/style.css" rel="stylesheet">
 </head>
 
@@ -84,10 +84,127 @@
                                 <div class="col-12">
                                     <div class="card">
                                         <div class="card-header">
-                                            <h4 class="card-title">Aqui estão todas as vagas registradas</h4>
+
                                         </div>
                                         <div class="card-body">
-                                            <div class="table-responsive">
+                                            <!-- Column starts -->
+                                            <div class="col-lg-12">
+                                                <div class="card">
+                                                    <div class="card-header d-block">
+                                                        <h4 class="card-title">Vagas</h4>
+                                                        <p class="m-0 subtitle">Veja as vagas e seus respectivos
+                                                            candidatos</p>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div id="accordion-six" class="accordion accordion-with-icon">
+                                                            <% vagas.forEach((vaga, index)=> { %>
+                                                                <div class="accordion__item">
+                                                                    <div class="accordion__header collapsed"
+                                                                        data-toggle="collapse"
+                                                                        data-target="#with-icon_collapse<%= index %>">
+                                                                        <span class="accordion__header--icon"></span>
+                                                                        <span class="accordion__header--text">
+                                                                            <%= vaga.cargo %> - <%= vaga.empresa %>
+                                                                        </span>
+                                                                        <span
+                                                                            class="accordion__header--indicator indicator_bordered"></span>
+                                                                    </div>
+                                                                    <div id="with-icon_collapse<%= index %>"
+                                                                        class="collapse accordion__body"
+                                                                        data-parent="#accordion-six">
+                                                                        <div class="accordion__body--text">
+                                                                            <% if (vaga.candidatos.length===0) { %>
+                                                                                <p>Sem candidatos até o momento</p>
+                                                                                <% } else { %>
+                                                                                    <table class="table table-striped">
+                                                                                        <thead>
+                                                                                            <tr>
+                                                                                                <th>ID</th>
+                                                                                                <th>Nome</th>
+                                                                                                <th>Email</th>
+                                                                                                <th>Ação</th>
+                                                                                                <!-- Novo cabeçalho para as ações -->
+                                                                                            </tr>
+                                                                                        </thead>
+                                                                                        <tbody style="color: black;">
+                                                                                            <%
+                                                                                                vaga.candidatos.forEach(candidato=>
+                                                                                                { %>
+                                                                                                <tr>
+                                                                                                    <td>
+                                                                                                        <%= candidato.id
+                                                                                                            %>
+                                                                                                    </td>
+                                                                                                    <td>
+                                                                                                        <%= candidato.nome
+                                                                                                            %>
+                                                                                                    </td>
+                                                                                                    <td>
+                                                                                                        <%= candidato.email
+                                                                                                            %>
+                                                                                                    </td>
+                                                                                                    <p>Path: <%=
+                                                                                                            candidato.caminho_arquivo
+                                                                                                            %>
+                                                                                                    </p>
+
+                                                                                                    <td>
+                                                                                                        <!-- Link para o perfil do candidato -->
+                                                                                                        <a href="/admin/candidatos-editar/<%= candidato.id %>"
+                                                                                                            class="btn btn-primary btn-sm">Perfil</a>
+                                                                                                        <!-- Botão para visualizar o currículo -->
+                                                                                                        <!-- Atualização no código EJS -->
+                                                                                                        <!-- Adicione um botão para visualizar o currículo -->
+                                                                                                        <button
+                                                                                                            class="btn btn-secondary btn-sm"
+                                                                                                            onclick="visualizarCurriculo('<%= candidato.file %>')">Currículo</button>
+
+                                                                                                    </td>
+                                                                                                </tr>
+                                                                                                <% }) %>
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                    <% } %>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <% }) %>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Column ends -->
+                                            <!-- Modal para visualizar o currículo -->
+                                            <div class="modal fade" id="curriculoModal" tabindex="-1" role="dialog"
+                                                aria-labelledby="curriculoModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog modal-lg" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="curriculoModalLabel">Visualizar
+                                                                Currículo</h5>
+                                                            <button type="button" class="close" data-dismiss="modal"
+                                                                aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <!-- Iframe para exibir o documento -->
+                                                            <iframe id="curriculoFrame" src=""
+                                                                style="width:100%; height:500px;"
+                                                                frameborder="0"></iframe>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary"
+                                                                data-dismiss="modal">Fechar</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+
+
+                                            <!-- <div class="table-responsive">
                                                 <table id="example" class="display text-center"
                                                     style="min-width: 845px">
                                                     <thead>
@@ -104,56 +221,30 @@
                                                     </thead>
 
                                                     <tbody style="color: black;">
-                                                        <% vagas.forEach((vagas)=>{ %>
-                                                            <tr>
-                                                                <td>
-                                                                    <%=vagas.id%>
-                                                                </td>
-                                                                <td>
-                                                                    <%=vagas.cargo%>
-                                                                </td>
-                                                                <td><%=vagas.status%></td>
-                                                                <td>
-                                                                    <%=vagas.breveDescricao%>
-                                                                </td>
-                                                                <td>
-                                                                    <%=vagas.empresa%>
-                                                                </td>
-                                                                <td>
-                                                                    <%=vagas.salario%>
-                                                                </td>
-                                                                <td>
-                                                                    <%=vagas.data_publicacao%>
-                                                                </td>
-                                                                <td>
-                                                                    <div class="row text-center">
-                                                                        <div class="col-sm-3 text-center">
-                                                                            <a class="btn btn-sm btn-transparent"
-                                                                                type="submit"
-                                                                                href="/admin/vagas-editar/<%=vagas.id%>"
-                                                                                class="" data-toggle="tooltip"
-                                                                                data-placement="top" title="Edit"><i
-                                                                                    class="fa fa-pencil color-muted"></i></a>
-
-                                                                        </div>
-                                                                        <div class="col-sm-3 text-center">
-                                                                            <form action="/admin/vaga-delete"
-                                                                                method="POST"
-                                                                                onsubmit="verifica(event, this)">
-                                                                                <input type="hidden" name="id"
-                                                                                    value="<%=vagas.id%>">
-                                                                                <button
-                                                                                    class="btn btn-sm btn-transparent"
-                                                                                    type="submit">
-                                                                                    <i
-                                                                                        class="fa fa-close color-danger"></i>
-                                                                                </button>
-                                                                            </form>
-                                                                        </div>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
+                                                        <% vagas.forEach(vaga=> { %>
+                                                            <div class="vaga">
+                                                                <h2>
+                                                                    <%= vaga.cargo %>
+                                                                </h2>
+                                                                <p>
+                                                                    <%= vaga.empresa %>
+                                                                </p>
+                                                                <h3>Candidatos:</h3>
+                                                                <ul>
+                                                                    <% vaga.candidatos.forEach(candidato=> { %>
+                                                                        <li>
+                                                                            <%= candidato.nome %> - <%= candidato.email
+                                                                                    %>
+                                                                        </li>
+                                                                        <% }) %>
+                                                                            <% if (vaga.candidatos.length===0) { %>
+                                                                                <li>Sem candidatos até o momento</li>
+                                                                                <% } %>
+                                                                </ul>
+                                                            </div>
                                                             <% }) %>
+
+
                                                     </tbody>
 
                                                     <tfoot>
@@ -169,7 +260,7 @@
                                                         </tr>
                                                     </tfoot>
                                                 </table>
-                                            </div>
+                                            </div> -->
                                         </div>
                                     </div>
                                 </div>
@@ -236,6 +327,17 @@
     <!-- Datatable -->
     <script src="../dashBoard/vendor/datatables/js/jquery.dataTables.min.js"></script>
     <script src="../dashBoard/js/plugins-init/datatables.init.js"></script>
+
+    <!-- JavaScript para abrir o modal e exibir o currículo -->
+    <script>
+        function visualizarCurriculo(caminhoArquivo) {
+            const modal = $('#curriculoModal');
+            const iframe = document.getElementById('curriculoFrame');
+            iframe.src = caminhoArquivo; // Define o caminho do arquivo no iframe
+            modal.modal('show'); // Abre o modal
+        }
+    </script>
+
 </body>
 
 </html>
