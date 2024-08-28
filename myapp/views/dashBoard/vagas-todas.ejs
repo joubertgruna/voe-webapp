@@ -113,65 +113,41 @@
                                                                         class="collapse accordion__body"
                                                                         data-parent="#accordion-six">
                                                                         <div class="accordion__body--text">
-                                                                            <% if (vaga.candidatos.length===0) { %>
+                                                                            <% if (vaga.candidatos.length === 0) { %>
                                                                                 <p>Sem candidatos até o momento</p>
-                                                                                <% } else { %>
-                                                                                    <table class="table table-striped">
-                                                                                        <thead>
+                                                                            <% } else { %>
+                                                                                <table id="table-<%= index %>" class="display" style="min-width: 845px">
+                                                                                    <thead>
+                                                                                        <tr>
+                                                                                            <th>ID</th>
+                                                                                            <th>Nome</th>
+                                                                                            <th>Email</th>
+                                                                                            <th>Ação</th>
+                                                                                        </tr>
+                                                                                    </thead>
+                                                                                    <tbody style="color: black;">
+                                                                                        <% vaga.candidatos.forEach(candidato => { %>
                                                                                             <tr>
-                                                                                                <th>ID</th>
-                                                                                                <th>Nome</th>
-                                                                                                <th>Email</th>
-                                                                                                <th>Ação</th>
-                                                                                                <!-- Novo cabeçalho para as ações -->
+                                                                                                <td><%= candidato.id %></td>
+                                                                                                <td><%= candidato.nome %></td>
+                                                                                                <td><%= candidato.email %></td>
+                                                                                                <td>
+                                                                                                    <a href="/admin/candidatos-editar/<%= candidato.id %>" class="btn btn-primary btn-sm">Perfil</a>
+                                                                                                    <button class="btn btn-secondary btn-sm" onclick="visualizarCurriculo('<%= candidato.file %>', '<%= candidato.id %>')">Currículo</button>
+                                                                                                    <% if (candidato.auditado) { %>
+                                                                                                        <span id="check-icon-<%= candidato.id %>" class="check-icon">&#x2714;</span>
+                                                                                                    <% } else { %>
+                                                                                                        <span id="check-icon-<%= candidato.id %>" class="check-icon" style="display: none;">&#x2714;</span>
+                                                                                                    <% } %>
+                                                                                                </td>
                                                                                             </tr>
-                                                                                        </thead>
-                                                                                        <tbody style="color: black;">
-                                                                                            <!-- Atualização no código EJS -->
-                                                                                            <%
-                                                                                                vaga.candidatos.forEach(candidato=>
-                                                                                                { %>
-                                                                                                <tr>
-                                                                                                    <td>
-                                                                                                        <%= candidato.id
-                                                                                                            %>
-                                                                                                    </td>
-                                                                                                    <td>
-                                                                                                        <%= candidato.nome
-                                                                                                            %>
-                                                                                                    </td>
-                                                                                                    <td>
-                                                                                                        <%= candidato.email
-                                                                                                            %>
-                                                                                                    </td>
-                                                                                                    <td>
-                                                                                                        <a href="/admin/candidatos-editar/<%= candidato.id %>"
-                                                                                                            class="btn btn-primary btn-sm">Perfil</a>
-                                                                                                        <button
-                                                                                                            class="btn btn-secondary btn-sm"
-                                                                                                            onclick="visualizarCurriculo('<%= candidato.file %>', '<%= candidato.id %>')">Currículo</button>
-                                                                                                        <!-- Adicione um sinal de check se o currículo foi auditado -->
-                                                                                                        <% if
-                                                                                                            (candidato.auditado)
-                                                                                                            { %>
-                                                                                                            <span
-                                                                                                                id="check-icon-<%= candidato.id %>"
-                                                                                                                class="check-icon">&#x2714;</span>
-                                                                                                            <% } else {
-                                                                                                                %>
-                                                                                                                <span
-                                                                                                                    id="check-icon-<%= candidato.id %>"
-                                                                                                                    class="check-icon"
-                                                                                                                    style="display: none;">&#x2714;</span>
-                                                                                                                <% } %>
-                                                                                                    </td>
-                                                                                                </tr>
-                                                                                                <% }) %>
-
-                                                                                        </tbody>
-                                                                                    </table>
-                                                                                    <% } %>
+                                                                                        <% }) %>
+                                                                                    </tbody>
+                                                                                </table>
+                                                                            <% } %>
                                                                         </div>
+                                                                        
+
                                                                     </div>
                                                                 </div>
                                                                 <% }) %>
@@ -400,6 +376,27 @@
                 .catch(error => console.error('Erro:', error));
         }
     </script>
+    <script>
+        $(document).ready(function() {
+            // Inicializa o DataTable para todas as tabelas ao carregar a página
+            $('table.display').each(function() {
+                if (!$.fn.DataTable.isDataTable(this)) {
+                    $(this).DataTable();
+                }
+            });
+    
+            // Re-inicializa DataTable quando um acordeão for expandido, caso não tenha sido inicializado
+            $('.accordion__item').on('shown.bs.collapse', function() {
+                $(this).find('table.display').each(function() {
+                    if (!$.fn.DataTable.isDataTable(this)) {
+                        $(this).DataTable();
+                    }
+                });
+            });
+        });
+    </script>
+    
+    
 
 
 
