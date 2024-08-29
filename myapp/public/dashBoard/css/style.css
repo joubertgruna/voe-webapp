@@ -8082,7 +8082,7 @@ a {
     font-size: 1.125rem;
     color: #fff;
     text-decoration: none;
-    padding-left: 1.25rem;
+    padding-left: 0.25rem;
     font-weight: 700; }
     [data-sidebar-style="compact"] .nav-header .brand-logo,
     [data-sidebar-style="mini"] .nav-header .brand-logo {
@@ -16860,7 +16860,8 @@ table.dataTable.display tbody td {
 .authincation-content {
   background: #fff;
   box-shadow: 0 0 35px 0 rgba(154, 161, 171, 0.15);
-  border-radius: 5px; }
+  border-radius: 10px;
+  }
   [data-theme-version="dark"] .authincation-content {
     background: #323A4B;
     box-shadow: none; }
