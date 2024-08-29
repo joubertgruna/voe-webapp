@@ -17,13 +17,16 @@ jobs:
         run: |
           # Obtenha o total de commits que você fez
           total_commits=$(curl -s "https://api.github.com/search/commits?q=author:${{ github.actor }}" -H "Accept: application/vnd.github.cloak-preview" | jq '.total_count')
-          
+
           # Obtenha os últimos 3 repositórios atualizados
           repos=$(curl -s "https://api.github.com/users/${{ github.actor }}/repos?sort=updated&direction=desc&per_page=3" | jq -r '.[].name')
 
           # Salve os dados como arquivos de ambiente
           echo "total_commits=$total_commits" >> $GITHUB_ENV
-          echo "repos=$repos" >> $GITHUB_ENV
+
+          # Reformatando a lista de repositórios para evitar problemas de formatação
+          repos_formatted=$(echo "$repos" | paste -sd "," -)
+          echo "repos=$repos_formatted" >> $GITHUB_ENV
 
       - name: Update README
         run: |
@@ -35,7 +38,8 @@ jobs:
           echo -e "\n## Estatísticas do GitHub\n" >> README.md
           echo "Total de commits: $total_commits" >> README.md
           echo "Últimos repositórios atualizados:" >> README.md
-          for repo in $repos; do
+          IFS=',' read -r -a repos_array <<< "$repos"
+          for repo in "${repos_array[@]}"; do
             echo "- $repo" >> README.md
           done
 
