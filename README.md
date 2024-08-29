@@ -7,3 +7,11 @@ Total de commits: 36
 - voe-webapp
 - joubertgruna
 - CRUD---API-REST
+
+## Estatísticas do GitHub
+
+Total de commits: 47
+Últimos repositórios atualizados:
+- PersonalNutri
+- joubertgruna
+- voe-webapp
