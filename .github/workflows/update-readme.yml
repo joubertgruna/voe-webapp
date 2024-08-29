@@ -1,0 +1,49 @@
+name: Update README with GitHub API Data
+
+on:
+  schedule:
+    # Agendado para rodar uma vez por dia (você pode ajustar isso conforme necessário)
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Permite iniciar o workflow manualmente
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Get GitHub Data
+        id: github_data
+        run: |
+          # Obtenha o total de commits que você fez
+          total_commits=$(curl -s "https://api.github.com/search/commits?q=author:${{ github.actor }}" -H "Accept: application/vnd.github.cloak-preview" | jq '.total_count')
+          
+          # Obtenha os últimos 3 repositórios atualizados
+          repos=$(curl -s "https://api.github.com/users/${{ github.actor }}/repos?sort=updated&direction=desc&per_page=3" | jq -r '.[].name')
+
+          # Salve os dados como outputs para o próximo passo
+          echo "::set-output name=total_commits::$total_commits"
+          echo "::set-output name=repos::$repos"
+
+      - name: Update README
+        run: |
+          # Leia o conteúdo atual do README.md
+          readme=$(cat README.md)
+
+          # Atualize o conteúdo com o número de commits e últimos repositórios
+          echo "$readme" > README.md
+          echo -e "\n## Estatísticas do GitHub\n" >> README.md
+          echo "Total de commits: ${{ steps.github_data.outputs.total_commits }}" >> README.md
+          echo "Últimos repositórios atualizados:" >> README.md
+          for repo in ${{ steps.github_data.outputs.repos }}; do
+            echo "- $repo" >> README.md
+          done
+
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "GitHub Actions"
+          git add README.md
+          git commit -m "Atualizando dados do README"
+          git push
