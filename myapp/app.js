@@ -32,6 +32,22 @@ app.use('/', webSiteRouter);
 app.use(function(req, res, next) {
   next(createError(404));
 });
+// Captura 404 e encaminha para o manipulador de erro
+app.use((req, res, next) => {
+  const err = new Error('Not Found');
+  err.status = 404;
+  next(err);
+});
+
+// Manipulador de erros
+app.use((err, req, res, next) => {
+  res.status(err.status || 500);
+  res.render('error', {
+      message: err.message,
+      error: req.app.get('env') === 'development' ? err : {}
+  });
+});
+
 
 
 // error handler
