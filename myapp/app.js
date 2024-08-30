@@ -23,7 +23,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Configuração do middleware para o upload de arquivos
 app.use(fileUpload());
 // Serve o diretório 'uploads' de forma estática
-app.use('/uploads', express.static(path.join(__dirname, 'routes', 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'routes', 'uploads', )));
+
+// Serve o diretório 'uploads' de imagens de posts de blog (pasta dentro de 'myapp/uploads')
+app.use('/uploads/blog', express.static(path.join(__dirname, 'uploads', 'blog')));
 
 app.use('/admin', indexRouter);
 app.use('/', webSiteRouter);

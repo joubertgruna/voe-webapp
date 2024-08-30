@@ -105,7 +105,7 @@ router.get('/blog-single/:id', (req, res) => {
     const listagemVaga = knex.select('*').from('blog').where({ id: id }).first();
     listagemVaga.then((blog) => {
       if (blog) {
-        // console.log('Candidato encontrado:', candidato);
+         console.log('Blog:::', blog);
       } else {
         console.log('Nenhuma vaga encontrado com o ID fornecido.');
       }

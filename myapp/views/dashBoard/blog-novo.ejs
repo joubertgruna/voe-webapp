@@ -88,11 +88,15 @@
                             </div>
                             <div class="card-body">
                                 <div class="basic-form">
-                                    <form method="POST" action="/admin/blog-cadastro">
+                                    <form method="POST" action="/admin/blog-cadastro" enctype="multipart/form-data">
                                         <div class="form-row">
                                             <div class="form-group col-md-4">
                                                 <label>Titulo</label>
                                                 <input type="text" name="titulo" class="form-control" placeholder="Qual o titulo da postagem">
+                                            </div>
+                                            <div class="form-group col-md-4">
+                                                <label>Descrição rápida</label>
+                                                <input type="text" name="descricaoBreve" class="form-control" placeholder="Qual a descrição breve da postagem">
                                             </div>
                                             <div class="form-group col-md-4">
                                                 <label>Categoria</label>
@@ -103,8 +107,17 @@
                                                 <input type="text" name="autor" class="form-control" placeholder="Qual o autor do post">
                                             </div>
                                             <div class="form-group col-md-12">
-                                                <label>Conteudo</label>
+                                                <label>Conteúdo</label>
                                                 <textarea type="text-area" name="conteudo" class="summernote" placeholder="Digite aqui o conteúdo da postagem"></textarea>
+                                            </div>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Imagem do post</span>
+                                                </div>
+                                                <div class="custom-file">
+                                                    <input type="file" name="imagem" accept="image/*" class="custom-file-input">
+                                                    <label class="custom-file-label">Escolha um arquivo</label>
+                                                </div>
                                             </div>
                                         </div>
                                         <button type="submit" class="btn btn-primary">Criar</button>

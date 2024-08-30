@@ -330,56 +330,66 @@ router.get('/blog-novo', verificaAutenticacao, function (req, res, next) {
   res.render('./dashBoard/blog-novo', { title: 'Express' });
 });
 /* POST create postagens page. */
-router.post('/blog-cadastro', (req, res) => {
-  var titulo = req.body.titulo
-  var conteudo = req.body.conteudo
-  var categoria = req.body.categoria
-  var autor = req.body.autor
+router.post('/blog-cadastro', async (req, res) => {
+  var titulo = req.body.titulo;
+  var conteudo = req.body.conteudo;
+  var categoria = req.body.categoria;
+  var autor = req.body.autor;
+  var descricaoBreve = req.body.descricaoBreve;
+
   function getCurrentDateTime() {
     const now = new Date();
-
     const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0'); // Janeiro é 0!
+    const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
-
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
-
-    // Formato: YYYY-MM-DD HH:MM:SS
-    const formattedDateTime = `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
-
-    return formattedDateTime;
+    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
   }
 
-  // Exemplo de uso
   const dateTime = getCurrentDateTime();
-  console.log(dateTime);
 
-  const validate = { titulo, conteudo, categoria, autor, created_at: dateTime }
+  // Validação de dados
+  if (!titulo || !descricaoBreve || !conteudo || !categoria || !autor) {
+    console.log('Algo deu errado no envio dos dados');
+    return res.redirect('/admin/blog-cadastro');
+  }
 
-  if (validate.titulo && validate.conteudo && validate.categoria && validate.autor != '') {
-    console.log('Dados enviados com sucesso', [validate])
-    try {
-      knex('blog').insert({
-        titulo: titulo,
-        categoria: categoria,
-        conteudo: conteudo,
-        autor: autor
-      }).then((validate) => {
-        console.log('Postagem inserida com sucesso!', [validate]);
-      })
+  try {
+    // Processamento do upload da imagem
+    let imagePath = null;
+    if (req.files && req.files.imagem) {
+      const imagem = req.files.imagem;
+      const uploadPath = path.join(__dirname, '../uploads/blog/', imagem.name);
 
-    } catch (error) {
-      console.error('Erro ao inserir o candidato:', error);
+      // Mover o arquivo para a pasta de uploads
+      await imagem.mv(uploadPath);
+      
+      // Salvar o caminho da imagem
+      imagePath = `uploads/blog/${imagem.name}`;
     }
-    res.redirect('/admin/blog-posts')
-  }
-  else {
-    console.log('Algo deu errado no envio dos dados')
-  }
 
-})
+    // Inserir os dados no banco de dados, incluindo o caminho da imagem
+    await knex('blog').insert({
+      titulo: titulo,
+      descricaoBreve: descricaoBreve,
+      categoria: categoria,
+      conteudo: conteudo,
+      autor: autor,
+      imagem: imagePath,  // Caminho da imagem
+      // created_at: dateTime
+    });
+
+    console.log('Postagem inserida com sucesso!');
+    res.redirect('/admin/blog-posts');
+  } catch (error) {
+    console.error('Erro ao inserir a postagem:', error);
+    res.redirect('/admin/blog-cadastro');
+  }
+});
+
+
 /* GET editar postagens page. */
 router.get('/blog-editar/:id', verificaAutenticacao, function (req, res, next) {
   var id = req.params.id
@@ -398,57 +408,81 @@ router.get('/blog-editar/:id', verificaAutenticacao, function (req, res, next) {
   }
 
 });
-/* POST Atualiza postagem destino. */
-router.post('/blog-edita/:id', (req, res) => {
-  var id = req.params.id
-  var titulo = req.body.titulo
-  var conteudo = req.body.conteudo
-  var categoria = req.body.categoria
-  var autor = req.body.autor
+router.post('/blog-edita/:id', async (req, res) => {
+  var id = req.params.id;
+  var titulo = req.body.titulo;
+  var descricaoBreve = req.body.descricaoBreve;
+  var conteudo = req.body.conteudo;
+  var categoria = req.body.categoria;
+  var autor = req.body.autor;
+
   function getCurrentDateTime() {
     const now = new Date();
-
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0'); // Janeiro é 0!
     const day = String(now.getDate()).padStart(2, '0');
-
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
-
-    // Formato: YYYY-MM-DD HH:MM:SS
-    const formattedDateTime = `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
-
-    return formattedDateTime;
+    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
   }
 
-  // Exemplo de uso
   const dateTime = getCurrentDateTime();
-  console.log(dateTime);
 
-  const validate = {
-    id, titulo, conteudo, categoria, autor, updated_at, updated_at: dateTime
-  }
+  if (titulo && descricaoBreve && conteudo && categoria && autor) {
+    try {
+      // Recuperar a postagem atual do banco de dados
+      const postagem = await knex('blog').where({ id }).first();
 
-  if (validate.titulo && validate.id && validate.conteudo && validate.categoria && validate.autor != '') {
-    // console.log('Dados recebidos com sucesso', [validate])
-    // Função para inserir um novo post no banco de dados
-    // async function inserirCandidato(nome, email, idade, genero) {
-    knex('blog').where({ id: id }).update(validate)
-      .then(() => {
-        console.log('Post atualizado com sucesso!', [validate]);
-        res.redirect(`/admin/blog-editar/${validate.id}`);
-      })
-      .catch((error) => {
-        console.error('Erro ao atualizar o candidato:', error);
-        res.status(500).send('Erro ao atualizar a postagem no blog');
+      let imagePath = postagem.imagem; // Manter o caminho atual da imagem, a menos que seja alterado
+
+      // Verifica se uma nova imagem foi enviada
+      if (req.files && req.files.imagem) {
+        const imagem = req.files.imagem;
+        const uploadPath = path.join(__dirname, '../uploads/blog/', imagem.name);
+
+        // Remover a imagem antiga, se existir
+        if (postagem.imagem) {
+          const oldImagePath = path.join(__dirname, '../', postagem.imagem);
+          fs.unlink(oldImagePath, (err) => {
+            if (err) {
+              console.error("Erro ao remover a imagem antiga:", err);
+            } else {
+              console.log("Imagem antiga removida com sucesso.");
+            }
+          });
+        }
+
+        // Mover a nova imagem para a pasta de uploads
+        await imagem.mv(uploadPath);
+
+        // Atualizar o caminho da nova imagem
+        imagePath = `uploads/blog/${imagem.name}`;
+      }
+
+      // Atualizar a postagem com os novos dados
+      await knex('blog').where({ id }).update({
+        titulo,
+        descricaoBreve,
+        conteudo,
+        categoria,
+        autor,
+        imagem: imagePath, // Atualiza o caminho da imagem
+        // updated_at: dateTime // Opcional: Se tiver um campo de atualização de data/hora
       });
+
+      console.log('Post atualizado com sucesso!');
+      res.redirect(`/admin/blog-editar/${id}`);
+    } catch (error) {
+      console.error('Erro ao atualizar o post:', error);
+      res.status(500).send('Erro ao atualizar a postagem no blog');
+    }
   } else {
     console.log('Dados incompletos no envio');
-    // res.status(400).send('Dados incompletos ou inválidos');
+    res.status(400).send('Dados incompletos ou inválidos');
   }
+});
 
-})
 router.post('/blog-delete', (req, res) => {
   var id = req.body.id
 
