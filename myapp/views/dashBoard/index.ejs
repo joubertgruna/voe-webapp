@@ -74,6 +74,20 @@
                         <div class="card">
                             <div class="stat-widget-two card-body">
                                 <div class="stat-content">
+                                    <div class="stat-text">Total de candidaturas</div>
+                                    <div class="stat-digit"><%=candidatosTotal%></div>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-success w-100" role="progressbar"
+                                        aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-sm-6">
+                        <div class="card">
+                            <div class="stat-widget-two card-body">
+                                <div class="stat-content">
                                     <div class="stat-text">Vagas em Aberto </div>
                                     <div class="stat-digit"><%=vagasAbertas%></div>
                                 </div>
@@ -140,21 +154,50 @@
                             </div>
                         </div>
                     </div>
-                   
-                    <div class="col-lg-2 col-sm-6">
+                    <hr>
+                    <div class="col-lg-4 col-sm-6">
                         <div class="card">
                             <div class="stat-widget-two card-body">
                                 <div class="stat-content">
-                                    <div class="stat-text">Total de candidaturas</div>
-                                    <div class="stat-digit"><%=candidatosTotal%></div>
+                                    <div class="stat-text">- Rtn Negativo</div>
+                                    <div class="stat-digit"><%=triagemEntrevistaCliente%></div>
                                 </div>
                                 <div class="progress">
-                                    <div class="progress-bar progress-bar-success w-100" role="progressbar"
-                                        aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                    <div class="progress-bar progress-bar-warning w-100" role="progressbar"
+                                        aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <div class="col-lg-4 col-sm-6">
+                        <div class="card">
+                            <div class="stat-widget-two card-body">
+                                <div class="stat-content">
+                                    <div class="stat-text">- Avaliação Técnica / Comportamental</div>
+                                    <div class="stat-digit"><%=triagemEntrevistaCliente%></div>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-warning w-100" role="progressbar"
+                                        aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 col-sm-6">
+                        <div class="card">
+                            <div class="stat-widget-two card-body">
+                                <div class="stat-content">
+                                    <div class="stat-text">- Candidatos selecionados</div>
+                                    <div class="stat-digit"><%=triagemEntrevistaCliente%></div>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-warning w-100" role="progressbar"
+                                        aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> 
                 </div>
                 
                 <div class="row">

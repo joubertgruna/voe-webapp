@@ -1,0 +1,23 @@
+Processo de triagem: 
+- Rtn Negativo
+- Avaliação Técnica / Comportamental
+- Entrevista VOE
+- Candidato selecionado
+
+---------------------------------------------------
+
+Criar um redirecionamento para o e-mail da VOE, usando o registrobr; 
+
+--------------------------------------------------
+
+Analisar as informações sobre a API do linkedin para futura integração;
+
+-----------------------------------------------
+
+A entrega do módulo de avaliação;
+
+--------------------------------------
+
+Criar uma funcionalidade para envio no e-mail dos candidatos : Presente
+
+--------------------------------------

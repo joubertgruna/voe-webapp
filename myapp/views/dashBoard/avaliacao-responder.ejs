@@ -4,88 +4,172 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Responder Avaliação</title>
-  <!-- Favicon icon -->
-  <link rel="icon" type="image/png" sizes="16x16" href="../../dashBoard/images/favicon.png">
-  <link href="../../dashBoard/css/style.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VOE - Responder Avaliação</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f7f7f7;
+    }
+
+    .form-container {
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .card {
+      border: none;
+    }
+  </style>
 </head>
 
 <body>
-  <div id="main-wrapper">
-    
-    <div class="content-body">
-      <div class="container">
-        <div class="row page-titles mx-0">
-          <div class="col-sm-6 p-md-0">
-            <div class="welcome-text">
-              <h4>Responder Avaliação</h4>
-              <p style="color: black;" class="mb-0">Responda as perguntas abaixo</p>
-            </div>
-          </div>
-          <!-- <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
-            <ol class="breadcrumb">
-              <li class="breadcrumb-item"><a href="javascript:void(0)">DashBoard</a></li>
-              <li class="breadcrumb-item active"><a href="javascript:void(0)">Responder Avaliação</a></li>
-            </ol>
-          </div> -->
-        </div>
-        <div class="row">
-          <div class="col-lg-9 justify-content-center">
-            <div class="card">
-              <!-- <div class="card-header">
-                <h4 class="card-title">Responder Avaliação</h4>
-              </div> -->
-              <div class="card-body">
-                <div class="basic-form">
-                  <form style="color: black;" id="responderForm" action="/admin/avaliacao-responder/<%= perguntas[0].test_id %>" method="POST">
-                    <input type="hidden" name="candidato_id" value="<%= candidato_id %>">
-                    <div id="questionsContainer">
-                      <% perguntas.forEach(function(pergunta, index) { %>
-                        <% if (pergunta.type === 'open') { %>
-                          <div class="form-group">
-                            <label>Pergunta <%= index + 1 %>:</label>
-                            <p><%= pergunta.text %></p>
-                            <textarea name="respostas[<%= index %>][texto]" class="form-control" required></textarea>
-                            <input type="hidden" name="respostas[<%= index %>][tipo]" value="open">
-                          </div>
-                          
-                        <% } else if (pergunta.type === 'multiple_choice') { %>
-                          <div class="form-group">
-                            <label>Pergunta <%= index + 1 %>:</label>
-                            <p><%= pergunta.text %></p>
-                            <% JSON.parse(pergunta.options).forEach(function(option, optionIndex) { %>
-                              <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="respostas[<%= index %>][opcoes][]" value="<%= option %>">
-                                <label class="form-check-label"><%= option %></label>
-                              </div>
-                            <% }); %>
-                            <input type="hidden" name="respostas[<%= index %>][tipo]" value="multiple_choice">
-                          </div>
-                          <hr>
-                        <% } %>
-                      <% }); %>
-                    </div>
-                    <button type="submit" class="btn btn-success">Enviar Respostas</button>
-                    <a href="/admin/avaliacoes-todas" class="btn btn-secondary">Cancelar</a>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+  <div class="container">
+    <div class="card form-container">
+      <div class="card-header text-center">
+        <h4 class="card-title">Responder Avaliação</h4>
+      </div>
+      <div class="card-body">
+        <form id="questionsForm" action="/admin/avaliacao/responder" method="POST">
+          <input type="hidden" id="avaliacaoId" name="avaliacaoId">
+          <input type="hidden" id="candidatoId" name="candidatoId">
+          <div id="questionsContainer" class="mb-4"></div>
+          <button type="submit" class="btn btn-primary btn-block">Enviar Respostas</button>
+        </form>
       </div>
     </div>
-    <!-- <div class="footer">
-      <div class="copyright">
-        <p>Copyright © Designed &amp; Developed by <a href="#" target="_blank">Quixkit</a> 2019</p>
-      </div>
-    </div> -->
   </div>
-  <script src="../../dashBoard/vendor/global/global.min.js"></script>
-  <script src="../../dashBoard/js/quixnav-init.js"></script>
-  <script src="../../dashBoard/js/custom.min.js"></script>
-  <script src="../../dashBoard/vendor/highlightjs/highlight.pack.min.js"></script>
+
+  <script>
+    // Obtém os parâmetros da URL
+    function getParamsFromUrl() {
+      const urlParts = window.location.pathname.split('/');
+      const avaliacaoId = urlParts[urlParts.length - 2];
+      const candidatoId = urlParts[urlParts.length - 1];
+      return { avaliacaoId, candidatoId };
+    }
+
+    // Busca as perguntas da API
+    async function fetchQuestions(avaliacaoId) {
+      try {
+        console.log(`Buscando perguntas para a avaliação ID: ${avaliacaoId}`);
+        const response = await fetch(`/admin/api/perguntas/${avaliacaoId}`);
+
+        // Verifica se a resposta da API é ok
+        if (!response.ok) {
+          console.error(`Erro ao buscar perguntas: ${response.statusText}`);
+          throw new Error('Erro ao buscar perguntas');
+        }
+
+        const data = await response.json();
+        console.log('Perguntas recebidas:', data);
+
+        // Verifica se os dados estão presentes
+        if (data && data.length > 0) {
+          return data;
+        } else {
+          console.warn('Nenhuma pergunta encontrada.');
+          return [];
+        }
+      } catch (error) {
+        console.error('Erro ao buscar perguntas:', error);
+        return [];
+      }
+    }
+
+    // Exibe as perguntas no formulário
+    async function displayQuestions(avaliacaoId) {
+      const perguntas = await fetchQuestions(avaliacaoId);
+      const container = document.getElementById('questionsContainer');
+
+      // Limpa o conteúdo anterior
+      container.innerHTML = '';
+
+      if (perguntas.length > 0) {
+        perguntas.forEach(pergunta => {
+          const perguntaElement = document.createElement('div');
+          perguntaElement.classList.add('mb-3');
+          perguntaElement.innerHTML = `<h5>${pergunta.conteudo || 'Pergunta sem título'}</h5>`;
+
+          // Cria um input para a resposta
+          if (pergunta.tipo === 'open') {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = `respostas[${pergunta.id}]`;
+            input.classList.add('form-control');
+            perguntaElement.appendChild(input);
+          } else if (pergunta.tipo === 'multiple_choice' && pergunta.opcoes) {
+            pergunta.opcoes.forEach(opcao => {
+              const optionElement = document.createElement('div');
+              optionElement.classList.add('form-check');
+              optionElement.innerHTML = `
+                <input class="form-check-input" type="radio" name="respostas[${pergunta.id}]" id="opcao${opcao.id}" value="${opcao.id}">
+                <label class="form-check-label" for="opcao${opcao.id}">${opcao.conteudo}</label>
+              `;
+              perguntaElement.appendChild(optionElement);
+            });
+          }
+
+          container.appendChild(perguntaElement);
+        });
+      } else {
+        container.innerText = 'Nenhuma pergunta disponível.';
+      }
+    }
+
+    // Inicializa a página
+    async function init() {
+      const { avaliacaoId, candidatoId } = getParamsFromUrl();
+      document.getElementById('avaliacaoId').value = avaliacaoId;
+      document.getElementById('candidatoId').value = candidatoId;
+
+      // Busca as perguntas e as exibe
+      await displayQuestions(avaliacaoId);
+    }
+
+    // Lida com o envio do formulário
+    document.getElementById('questionsForm').onsubmit = async function (event) {
+      event.preventDefault(); // Impede o envio padrão
+
+      const form = event.target;
+      const formData = new FormData(form);
+      const respostas = {};
+
+      for (let [key, value] of formData.entries()) {
+        if (key.startsWith('respostas')) {
+          const perguntaId = key.match(/\[(.*?)\]/)[1]; // Captura o id da pergunta
+          respostas[perguntaId] = value; // Adiciona a resposta
+        }
+      }
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            avaliacaoId: document.getElementById('avaliacaoId').value,
+            candidatoId: document.getElementById('candidatoId').value,
+            respostas: respostas
+          })
+        });
+
+        const data = await response.json();
+        console.log('Resposta do servidor:', data);
+        // Ação após o envio, como redirecionar ou mostrar uma mensagem
+        alert("Respostas enviadas com sucesso!");
+      } catch (error) {
+        console.error('Erro ao enviar respostas:', error);
+      }
+    };
+
+    // Chama a função de inicialização
+    init();
+  </script>
+
 </body>
 
 </html>

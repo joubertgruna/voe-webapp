@@ -95,7 +95,7 @@
                                                             <th>Id</th>
                                                             <th>Vaga</th>
                                                             <th>Nome da Avaliação</th>
-                                                            <th>Perguntas</th>
+                                                            <!-- <th>Perguntas</th> -->
                                                             <th>Data Criação</th>
                                                             <!-- <th>Nota Geral</th> -->
                                                             <th>Ações</th>
@@ -108,14 +108,35 @@
                                                                 <td><%= exercicio.id %></td>
                                                                 <td><%= exercicio.vaga_name %></td>
                                                                 <td><%= exercicio.test_name %></td>
-                                                                <td><%= exercicio.text %></td>
+                                                                <!-- <td><%= exercicio.text %></td> -->
                                                                 <td><%= exercicio.created_at %></td>
                                                                 <!-- <td><%= exercicio.nota_geral %></td> -->
                                                                 <td>
-                                                                  <a href="/admin/avaliacao-editar/<%= exercicio.id %>" class="btn btn-sm "><i
-                                                                    class="fa fa-pencil color-muted"></i></a>
-                                                                  <a href="/admin/avaliacao-delete/<%= exercicio.id %>" class="btn btn-sm c"><i
-                                                                    class="fa fa-close color-danger"></i></a>
+                                                                    <div class="row text-center">
+                                                                        <div class="col-sm-3 text-center">
+                                                                            <a class="btn btn-sm btn-transparent"
+                                                                                type="submit"
+                                                                                href="/admin/avaliacao/editar/<%= exercicio.id %>"
+                                                                                class="" data-toggle="tooltip"
+                                                                                data-placement="top" title="Edit"><i
+                                                                                    class="fa fa-pencil color-muted"></i></a>
+
+                                                                        </div>
+                                                                        <div class="col-sm-3 text-center">
+                                                                            <form action="/admin/avaliacao-delete/<%= exercicio.id %>"
+                                                                                method="POST"
+                                                                                onsubmit="verifica(event, this)">
+                                                                                <input type="hidden" name="id"
+                                                                                    value="<%=exercicio.id%>">
+                                                                                <button
+                                                                                    class="btn btn-sm btn-transparent"
+                                                                                    type="submit">
+                                                                                    <i class="fa fa-close color-danger"></i>
+                                                                                </button>
+                                                                            </form>
+                                                                        </div>
+                                                                    </div>
+                                                                  
                                                                 </td>
                                                               </tr>
                                                             <% }) %>
@@ -126,7 +147,7 @@
                                                             <th>Id</th>
                                                             <th>Vaga</th>
                                                             <th>Nome da Avaliação</th>
-                                                            <th>Perguntas</th>
+                                                            <!-- <th>Perguntas</th> -->
                                                             <th>Data Criação</th>
                                                             <!-- <th>Nota Geral</th> -->
                                                             <th>Ações</th>

@@ -2,287 +2,224 @@
 <html lang="pt-br">
 
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>VOE - Admin Dashboard</title>
-  <!-- Favicon icon -->
-  <link rel="icon" type="image/png" sizes="16x16" href="./images/favicon.png">
-  <link href="../dashBoard/css/style.css" rel="stylesheet">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOE - Admin Dashboard</title>
+    <link href="../dashBoard/css/style.css" rel="stylesheet">
+    <style>
+        /* Estilo básico para centralizar o formulário */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f7f7f7;
+        }
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        .card {
+            max-width: 700px;
+            width: 100%;
+        }
 
-  <style>
-    .question-options {
-      display: none;
-    }
-  </style>
+        .form-group {
+            margin-bottom: 20px;
+        }
 
+        .choices .choice {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .choice input[type="radio"] {
+            margin-right: 10px;
+        }
+    </style>
 </head>
 
 <body>
-
-  <!--*******************
-        Preloader start
-    ********************-->
-  <div id="preloader">
-    <div class="sk-three-bounce">
-      <div class="sk-child sk-bounce1"></div>
-      <div class="sk-child sk-bounce2"></div>
-      <div class="sk-child sk-bounce3"></div>
-    </div>
-  </div>
-  <!--*******************
-        Preloader end
-    ********************-->
-
-
-  <!--**********************************
-        Main wrapper start
-    ***********************************-->
-  <div id="main-wrapper">
-
-    <!--**********************************
-            Nav header start
-        ***********************************-->
-    <%- include('./partials/nav-header') %>
-      <!--**********************************
-            Nav header end
-        ***********************************-->
-
-      <!--**********************************
-            Header start
-        ***********************************-->
-      <%- include('./partials/header') %>
-        <!--**********************************
-            Header end ti-comment-alt
-        ***********************************-->
-
-        <!--**********************************
-            Sidebar start
-        ***********************************-->
-        <%- include('./partials/sidebar') %>
-          <!--**********************************
-            Sidebar end
-        ***********************************-->
-
-          <!--**********************************
-            Content body start
-        ***********************************-->
-          <div class="content-body">
-            <div class="container-fluid">
-              <div class="row page-titles mx-0">
-                <div class="col-sm-6 p-md-0">
-                  <div class="welcome-text">
-                    <h4>Bem vindo(a) ao painel</h4>
-                    <p class="mb-0">Crie uma nova Avaliação</p>
-                  </div>
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Criar Avaliação</h4>
+        </div>
+        <div class="card-body">
+            <form id="questionsForm">
+                <div class="form-group">
+                    <input class="form-control" type="text" name="titulo" placeholder="Título da Avaliação" required>
                 </div>
-                <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
-                  <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="javascript:void(0)">DashBoard</a></li>
-                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Nova Vaga</a>
-                    </li>
-                  </ol>
+                <div class="form-group">
+                    <textarea class="form-control" name="descricao" placeholder="Descrição" required></textarea>
                 </div>
-              </div>
-              <div class="row">
-                <div class="col-lg-12">
-                  <div class="card">
-                    <div class="card-header">
-                      <h4 class="card-title">Criar Avaliação</h4>
-                    </div>
-                    <style>
-                      .choice {
-                        margin-bottom: 10px;
-                      }
+                <div class="form-group">
+                    <select class="form-control" name="vagaId" required>
+                        <option value="">Selecione uma vaga</option>
+                        <% vagas.forEach((vaga) => { %>
+                        <option value="<%= vaga.id %>"><%= vaga.cargo %></option>
+                        <% }); %>
+                    </select>
+                </div>
 
-                      .removeChoice,
-                      .removeQuestion {
-                        margin-left: 10px;
-                      }
-                    </style>
-                    <div class="card-body">
-                      <div class="basic-form">
-                        <form id="questionsForm">
-                          <input type="hidden" id="test_id" value="1"> <!-- Ajuste o valor dinamicamente -->
-                          <input type="hidden" id="candidato_id" value="1"> <!-- Ajuste o valor dinamicamente -->
-                          <div class="form-group">
-                            <label for="test_name">Nome do Teste:</label>
-                            <input type="text" id="test_name" class="form-control" required>
-                          </div>
-                          <div class="form-group">
-                            <label for="vaga_name">Nome da Vaga:</label>
-                            <select id="vaga_name" class="form-control" required>
-                              <% vagas.forEach(function(vaga) { %>
-                                <option value="<%= vaga.cargo %>"><%= vaga.cargo %> </option>
-                              <% }); %>
+                <div id="questionsContainer">
+                    <!-- Pergunta inicial -->
+                    <div class="question mb-4">
+                        <div class="form-group">
+                            <label>Pergunta:</label>
+                            <textarea class="form-control question_text" name="perguntas[0][texto]" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Pergunta:</label>
+                            <select class="form-control question_type" name="perguntas[0][tipo]" required>
+                                <option value="open">Aberta</option>
+                                <option value="multiple_choice">Múltipla Escolha</option>
                             </select>
-                          </div>
-                          <div id="questionsContainer"></div>
-                          <button type="button" id="addQuestion" class="btn btn-secondary mb-3">Adicionar
-                            Pergunta</button><br>
-                          <button type="submit" class="btn btn-success">Enviar Perguntas</button>
-                          <div id="feedback" class="mt-3"></div>
-                        </form>
-                      </div>
+                        </div>
+
+                        <div class="choicesContainer form-group" style="display: none;">
+                            <label>Opções de Resposta:</label>
+                            <div class="choices"></div>
+                            <button type="button" class="btn btn-secondary addChoice">Adicionar Opção</button>
+                        </div>
+
+                        <button type="button" class="btn btn-danger removeQuestion">Remover Pergunta</button>
                     </div>
-                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-          <!--**********************************
-            Content body end
-        ***********************************-->
-          <!--**********************************
-            Content body end
-        ***********************************-->
 
-
-          <!--**********************************
-            Footer start
-        ***********************************-->
-          <div class="footer">
-            <div class="copyright">
-              <p>Copyright © Designed &amp; Developed by <a href="#" target="_blank">Quixkit</a> 2019</p>
-            </div>
-          </div>
-          <!--**********************************
-            Footer end
-        ***********************************-->
-
-          <!--**********************************
-           Support ticket button start
-        ***********************************-->
-
-          <!--**********************************
-           Support ticket button end
-        ***********************************-->
-
-
-  </div>
-  <!--**********************************
-        Main wrapper end
-    ***********************************-->
-
-  <!--**********************************
-        Scripts
-    ***********************************-->
-  <!-- Required vendors -->
-  <script src="../dashBoard/vendor/global/global.min.js"></script>
-  <script src="../dashBoard/js/quixnav-init.js"></script>
-  <script src="../dashBoard/js/custom.min.js"></script>
-
-  <script src="../dashBoard/vendor/highlightjs/highlight.pack.min.js"></script>
-  <!-- Circle progress -->
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-
-  <script>
-    let questionIndex = 0;
-
-    document.getElementById('addQuestion').addEventListener('click', function () {
-      addQuestionForm();
-    });
-
-    document.getElementById('questionsForm').addEventListener('submit', async function (e) {
-      e.preventDefault();
-
-      const test_name = document.getElementById('test_name').value;
-      const vaga_name = document.getElementById('vaga_name').value;
-      const test_id = document.getElementById('test_id').value;
-      const candidato_id = document.getElementById('candidato_id').value;
-      const questions = Array.from(document.querySelectorAll('.question')).map((questionDiv, index) => {
-        const type = questionDiv.querySelector('.question_type').value;
-        const text = questionDiv.querySelector('.question_text').value;
-        const choices = type === 'multiple_choice'
-          ? Array.from(questionDiv.querySelectorAll('.choice_text')).map(input => input.value)
-          : null;
-
-        return { test_name, vaga_name, test_id, candidato_id, type, text, options: choices };
-      });
-
-      document.getElementById('feedback').innerHTML = '<div class="alert alert-info">Perguntas enviadas com sucesso!</div>';
-
-      const response = await fetch('/admin/questions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ questions })
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        document.getElementById('feedback').innerHTML = '<div class="alert alert-success">Perguntas enviadas com sucesso!</div>';
-        document.getElementById('questionsForm').reset();
-        document.getElementById('questionsContainer').innerHTML = '';
-        questionIndex = 0;
-      } else {
-        document.getElementById('feedback').innerHTML = '<div class="alert alert-danger">Erro ao enviar perguntas: ' + data.error + '</div>';
-        console.error(data.details); // Registra o erro detalhado no console do navegador
-      }
-    });
-
-    function addQuestionForm() {
-      const questionDiv = document.createElement('div');
-      questionDiv.classList.add('question', 'mb-4');
-      questionDiv.innerHTML = `
-        <div class="form-group">
-          <label for="question_text_${questionIndex}">Pergunta:</label>
-          <textarea id="question_text_${questionIndex}" class="form-control question_text" required></textarea>
+                <button type="button" id="addQuestion" class="btn btn-primary">Adicionar Pergunta</button>
+                <button type="submit" class="btn btn-outline-dark">Criar Avaliação</button>
+            </form>
         </div>
-        <div class="form-group">
-          <label for="question_type_${questionIndex}">Tipo de Pergunta:</label>
-          <select id="question_type_${questionIndex}" class="form-control question_type" required>
-            <option value="open">Aberta</option>
-            <option value="multiple_choice">Múltipla Escolha</option>
-          </select>
-        </div>
-        <div class="choicesContainer form-group" style="display: none;">
-          <label>Opções:</label>
-          <div class="choices"></div>
-          <button type="button" class="btn btn-secondary addChoice">Adicionar Opção</button>
-        </div>
-        <button type="button" class="btn btn-danger removeQuestion">Remover Pergunta</button>
-      `;
+    </div>
 
-      document.getElementById('questionsContainer').appendChild(questionDiv);
+    <script>
+        let questionIndex = 1; // Começa com 1 porque já existe uma pergunta inicial
 
-      const typeSelect = questionDiv.querySelector('.question_type');
-      typeSelect.addEventListener('change', function () {
-        const choicesContainer = questionDiv.querySelector('.choicesContainer');
-        if (this.value === 'multiple_choice') {
-          choicesContainer.style.display = 'block';
-        } else {
-          choicesContainer.style.display = 'none';
+        // Função para adicionar uma nova pergunta
+        document.getElementById('addQuestion').addEventListener('click', addQuestionForm);
+
+        // Função para adicionar a estrutura de um formulário de pergunta
+        function addQuestionForm() {
+            const questionDiv = document.createElement('div');
+            questionDiv.classList.add('question', 'mb-4');
+            questionDiv.innerHTML = `
+                <div class="form-group">
+                    <label>Pergunta:</label>
+                    <textarea class="form-control question_text" name="perguntas[${questionIndex}][texto]" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Pergunta:</label>
+                    <select class="form-control question_type" name="perguntas[${questionIndex}][tipo]" required>
+                        <option value="open">Aberta</option>
+                        <option value="multiple_choice">Múltipla Escolha</option>
+                    </select>
+                </div>
+                <div class="choicesContainer form-group" style="display: none;">
+                    <label>Opções de Resposta:</label>
+                    <div class="choices"></div>
+                    <button type="button" class="btn btn-secondary addChoice">Adicionar Opção</button>
+                </div>
+                <button type="button" class="btn btn-danger removeQuestion">Remover Pergunta</button>
+            `;
+
+            document.getElementById('questionsContainer').appendChild(questionDiv);
+            setupQuestionEvents(questionDiv);
+            questionIndex++;
         }
-      });
 
-      const addChoiceButton = questionDiv.querySelector('.addChoice');
-      addChoiceButton.addEventListener('click', function () {
-        const choiceDiv = document.createElement('div');
-        choiceDiv.classList.add('choice', 'input-group', 'mb-2');
-        choiceDiv.innerHTML = `
-          <input type="text" class="form-control choice_text" placeholder="Opção" required>
-          <div class="input-group-append">
-            <button type="button" class="btn btn-danger removeChoice">Remover</button>
-          </div>
-        `;
-        questionDiv.querySelector('.choices').appendChild(choiceDiv);
+        // Configura eventos para as perguntas
+        function setupQuestionEvents(questionDiv) {
+            const typeSelect = questionDiv.querySelector('.question_type');
+            const choicesContainer = questionDiv.querySelector('.choicesContainer');
 
-        choiceDiv.querySelector('.removeChoice').addEventListener('click', function () {
-          choiceDiv.remove();
+            typeSelect.addEventListener('change', function () {
+                choicesContainer.style.display = this.value === 'multiple_choice' ? 'block' : 'none';
+            });
+
+            const addChoiceButton = questionDiv.querySelector('.addChoice');
+            addChoiceButton.addEventListener('click', function () {
+                addChoiceOption(questionDiv);
+            });
+
+            questionDiv.querySelector('.removeQuestion').addEventListener('click', function () {
+                questionDiv.remove();
+            });
+        }
+
+        function addChoiceOption(questionDiv) {
+            const choiceDiv = document.createElement('div');
+            choiceDiv.classList.add('choice');
+            choiceDiv.innerHTML = `
+                <input type="radio" class="correct_choice" name="perguntas[${questionIndex}][resposta_correta]" required>
+                <input type="text" class="form-control choice_text" name="perguntas[${questionIndex}][opcoes][]" placeholder="Opção" required>
+                <button type="button" class="btn btn-danger removeChoice">Remover</button>
+            `;
+            questionDiv.querySelector('.choices').appendChild(choiceDiv);
+
+            choiceDiv.querySelector('.removeChoice').addEventListener('click', function () {
+                choiceDiv.remove();
+            });
+        }
+
+        // Configura eventos para a pergunta inicial
+        setupQuestionEvents(document.querySelector('.question'));
+
+        // Envio do formulário em formato JSON
+        document.getElementById('questionsForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Impede o envio padrão do formulário
+
+            const formData = new FormData(e.target);
+            const data = {
+                titulo: formData.get('titulo'),
+                descricao: formData.get('descricao'),
+                vagaId: formData.get('vagaId'),
+                perguntas: []
+            };
+
+            // Captura as perguntas
+const questions = document.querySelectorAll('.question');
+questions.forEach((questionGroup) => {
+    const questionText = questionGroup.querySelector('textarea[name^="perguntas"][name*="texto"]');
+    const questionType = questionGroup.querySelector('select[name^="perguntas"][name*="tipo"]');
+    const options = Array.from(questionGroup.querySelectorAll('input[name^="perguntas"][name*="opcoes"]'));
+
+    // Verifique se os elementos foram encontrados
+    if (questionText && questionType) {
+        data.perguntas.push({
+            texto: questionText.value,
+            tipo: questionType.value,
+            opcoes: options.map(input => input.value)
         });
-      });
-
-      questionDiv.querySelector('.removeQuestion').addEventListener('click', function () {
-        questionDiv.remove();
-      });
-
-      questionIndex++;
     }
-  </script>
+});
+
+            console.log('Dados do formulário:', data); // Para ver os dados no console
+
+            try {
+                const response = await fetch('/admin/avaliacao/criar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                console.log('Resposta da requisição:', response); // Para ver a resposta no console
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Erro:', errorData.error);
+                    // Aqui você pode mostrar um alerta ou mensagem de erro para o usuário
+                } else {
+                    const responseData = await response.json();
+                    console.log('Avaliação criada com sucesso:', responseData);
+                    // Aqui você pode redirecionar o usuário ou mostrar uma mensagem de sucesso
+                }
+            } catch (error) {
+                console.error('Erro de rede:', error);
+                // Aqui você pode mostrar um alerta ou mensagem de erro para o usuário
+            }
+        });
+    </script>
 
 </body>
 

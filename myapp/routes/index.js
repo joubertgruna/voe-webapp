@@ -7,6 +7,8 @@ const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
 
 const session = require('express-session');
+const nodemailer = require('nodemailer'); // Biblioteca para envio de emails
+
 
 router.use(session({
   secret: 'voekey',
@@ -71,10 +73,72 @@ router.get('/', verificaAutenticacao, function (req, res, next) {
     console.error('Erro ao listar os posts:', error);
   }
 });
+router.get('/candidatos-editar/:id', verificaAutenticacao, async (req, res, next) => {
+  const id = req.params.id;
+
+  try {
+    console.log('ID do candidato:', id);
+
+    // Busca o candidato pelo ID
+    const candidato = await knex('candidatos').where({ id }).first();
+    console.log('Candidato encontrado:', candidato);
+
+    if (candidato) {
+      // Busca as avaliações respondidas associadas ao candidato
+      const avaliacoesRespondidas = await knex('Respostas_Candidatos AS rc')
+        .leftJoin('avaliacoes AS a', 'rc.candidato_id', 'a.candidatoId')
+        .leftJoin('respostas AS r', function() {
+          this.on('rc.pergunta_id', '=', 'r.perguntaId')
+              .andOn('rc.candidato_id', '=', 'r.candidatoId');
+        })
+        .select(
+          'rc.id AS resposta_candidato_id',
+          'rc.candidato_id',
+          'rc.pergunta_id',
+          'rc.resposta_id',
+          'rc.resposta_texto',
+          'rc.data_resposta',
+          'a.id AS avaliacao_id',
+          'a.titulo',
+          'a.descricao',
+          'a.vagaId',
+          'a.criadorId',
+          'a.candidatoId AS avaliacao_candidato_id',
+          'r.id AS resposta_id',
+          'r.conteudo AS resposta_conteudo',
+          'r.data_resposta AS data_resposta'
+        )
+        .where('rc.candidato_id', id)
+        .orderBy('rc.data_resposta', 'desc');
+
+      console.log('Avaliações respondidas encontradas:', avaliacoesRespondidas.length, avaliacoesRespondidas);
+
+      // Renderiza a página com as informações do candidato e as avaliações respondidas
+      res.render('./dashBoard/candidatos-editar', { 
+        title: 'Editar Candidato', 
+        id, 
+        candidato, 
+        avaliacoesRespondidas
+      });
+    } else {
+      console.log('Nenhum candidato encontrado com o ID fornecido.');
+      res.render('./dashBoard/candidatos-editar', { 
+        title: 'Editar Candidato', 
+        id, 
+        candidato: null, 
+        avaliacoesRespondidas: []
+      });
+    }
+  } catch (error) {
+    console.error('Erro ao selecionar o candidato ou as avaliações:', error);
+    res.status(500).send('Erro ao carregar as informações do candidato');
+  }
+});
+
 
 /**ROTAS DO MODULO - CANDIDATO **/
 /* POST Criar candidatos destino. */
-router.post('/candidatos-cad', (req, res) => { 
+router.post('/candidatos-cad', (req, res) => {
   if (!req.files || Object.keys(req.files).length === 0) {
     return res.status(400).send('Nenhum arquivo foi enviado.');
   }
@@ -231,10 +295,10 @@ router.post('/candidato-edita/:id', (req, res) => {
     possuiDeficiencia, tipoDeDeficiencia,
     formacaoAcademica, experienciaProfissional,
     cursosExtracurriculares, idiomas, informacoesAdicionais,
-    pretencaoSalarial, updated_at: dateTime, 
+    pretencaoSalarial, updated_at: dateTime,
   }
 
-  if (validate.id && validate.nome && validate.email  && validate.idade && validate.genero && validate.cidade && validate.estado
+  if (validate.id && validate.nome && validate.email && validate.idade && validate.genero && validate.cidade && validate.estado
     && validate.possuiDeficiencia && validate.tipoDeDeficiencia && validate.formacaoAcademica && validate.experienciaProfissional
     && validate.cursosExtracurriculares && validate.idiomas && validate.informacoesAdicionais && validate.pretencaoSalarial != '') {
     // console.log('Dados recebidos com sucesso', [validate])
@@ -255,24 +319,53 @@ router.post('/candidato-edita/:id', (req, res) => {
   }
 
 })
-/* GET renderiza candidatos editar page. */
-router.get('/candidatos-editar/:id', verificaAutenticacao, function (req, res, next) {
-  var id = req.params.id
-  try {
-    const candidato = knex.select('*').from('candidatos').where({ id: id }).first();
-    candidato.then((candidato) => {
-      if (candidato) {
-        // console.log('Candidato encontrado:', candidato);
-      } else {
-        console.log('Nenhum post encontrado com o ID fornecido.');
-      }
-      res.render('./dashBoard/candidatos-editar', { title: 'Express', id: id, candidato: candidato });
-    })
-  } catch (error) {
-    console.error('Erro ao selecionar o candidato:', error);
-  }
 
-});
+
+
+
+
+// Função para buscar respostas de múltipla escolha
+async function buscarRespostasMultiplaEscolha(candidatoId) {
+  return await knex('Respostas_Candidatos')
+    .innerJoin('opcoes', 'opcoes.id', 'Respostas_Candidatos.resposta_id')
+    .innerJoin('perguntas', 'perguntas.id', 'opcoes.perguntaId')
+    .innerJoin('avaliacoes', 'avaliacoes.id', 'perguntas.avaliacaoId')
+    .where('Respostas_Candidatos.candidato_id', candidatoId)
+    .select(
+      'avaliacoes.titulo as tituloAvaliacao',
+      'avaliacoes.id as avaliacaoId',
+      'opcoes.conteudo as resposta',
+      'Respostas_Candidatos.data_resposta'
+    );
+}
+
+// Função para buscar respostas abertas
+async function buscarRespostasAbertas(candidatoId) {
+  return await knex('Respostas_Candidatos')
+    .innerJoin('perguntas', 'perguntas.id', 'Respostas_Candidatos.pergunta_id')
+    .innerJoin('avaliacoes', 'avaliacoes.id', 'perguntas.avaliacaoId')
+    .where('Respostas_Candidatos.candidato_id', candidatoId)
+    .andWhere('perguntas.tipo', 'open') // Filtra apenas perguntas abertas
+    .select(
+      'avaliacoes.titulo as tituloAvaliacao',
+      'avaliacoes.id as avaliacaoId',
+      'Respostas_Candidatos.resposta_texto as resposta',
+      'Respostas_Candidatos.data_resposta'
+    );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 router.post('/candidatos-delete', verificaAutenticacao, (req, res) => {
   var id = req.body.id
@@ -365,7 +458,7 @@ router.post('/blog-cadastro', async (req, res) => {
 
       // Mover o arquivo para a pasta de uploads
       await imagem.mv(uploadPath);
-      
+
       // Salvar o caminho da imagem
       imagePath = `uploads/blog/${imagem.name}`;
     }
@@ -563,10 +656,10 @@ router.get('/vagas-todas', verificaAutenticacao, async function (req, res, next)
 router.post('/candidatos/auditado/:id', async (req, res) => {
   const candidatoId = req.params.id;
   try {
-      await knex('candidatos').where('id', candidatoId).update({ auditado: 1 });
-      res.json({ success: true });
+    await knex('candidatos').where('id', candidatoId).update({ auditado: 1 });
+    res.json({ success: true });
   } catch (error) {
-      res.status(500).json({ error: 'Erro ao atualizar candidato' });
+    res.status(500).json({ error: 'Erro ao atualizar candidato' });
   }
 });
 
@@ -721,397 +814,516 @@ router.post('/vaga-delete', (req, res) => {
 /**** FINAL ROTAS DO MODULO VAGAS ****/
 
 
+
 /**ROTAS DO MODULO AVALIAÇÕES **/
-router.post('/avaliacao-cadastrar', async (req, res) => {
-  const { questions } = req.body;
+router.get('/avaliacao-criar', (req, res) => {
+  // Consulta no banco de dados para buscar todas as vagas
+  knex('vagas')
+    .select('*') // Seleciona todas as colunas da tabela de vagas
+    .then(vagas => {
+      // Renderiza a página 'avaliacao-nova' passando as vagas para o formulário
+      res.render('./dashBoard/avaliacao-nova', { vagas: vagas });
+    })
+    .catch(error => {
+      console.error('Erro ao buscar vagas:', error);
+      res.status(500).send('Erro ao carregar a página de avaliação');
+    });
+});
+// Rota para listar avaliações
+router.get('/avaliacoes-todas', async (req, res) => {
+  try {
+    // Consulta as avaliações e as vagas relacionadas
+    const avaliacoes = await knex('avaliacoes')
+      .join('vagas', 'avaliacoes.vagaId', '=', 'vagas.id') // Corrigindo para 'vagaId' que é a FK correta
+      .select(
+        'avaliacoes.id',
+        'avaliacoes.titulo as test_name',  // Corrigido 'nome' para 'titulo'
+        'avaliacoes.data_criacao as created_at',
+        'vagas.cargo as vaga_name'
+      );
 
-   // Adicionar log para inspecionar o conteúdo de questions
-   console.log('Conteúdo de questions:', questions);
+    // Renderiza a view de avaliações
+    res.render('dashBoard/avaliacao-todas', { exercicio: avaliacoes });
+  } catch (error) {
+    console.error('Erro ao listar avaliações:', error);
+    res.status(500).send('Erro ao listar avaliações');
+  }
+});
+router.post('/avaliacao/criar', async (req, res) => {
+  const { titulo, descricao, vagaId, perguntas } = req.body;
 
-  function getCurrentDateTime() {
-    const now = new Date();
+  console.log('Dados recebidos no corpo da requisição:', req.body);
 
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0'); // Janeiro é 0!
-    const day = String(now.getDate()).padStart(2, '0');
-
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-
-    // Formato: YYYY-MM-DD HH:MM:SS
-    const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-
-    return formattedDateTime;
+  // Validações básicas de campos obrigatórios
+  if (!titulo || !descricao || !vagaId || !Array.isArray(perguntas) || perguntas.length === 0) {
+    console.error('Erro de validação: Título, descrição, vagaId e perguntas são obrigatórios.');
+    return res.status(400).json({ error: 'Título, descrição, vagaId e perguntas são obrigatórios.' });
   }
 
-  const dateTime = getCurrentDateTime();
-  console.log(dateTime);
+  // Validações de integridade para cada pergunta
+  for (let i = 0; i < perguntas.length; i++) {
+    const { texto, tipo, opcoes } = perguntas[i];
+
+    console.log(`Validando pergunta ${i + 1}:`, perguntas[i]);
+
+    if (!texto || !tipo) {
+      console.error(`Erro de validação: Pergunta ${i + 1} está incompleta.`);
+      return res.status(400).json({ error: `Pergunta ${i + 1} está incompleta.` });
+    }
+
+    if (tipo === 'multiple_choice' && (!opcoes || opcoes.length === 0)) {
+      console.error(`Erro de validação: Nenhuma opção encontrada para a pergunta ${i + 1}.`);
+      return res.status(400).json({ error: `Nenhuma opção encontrada para a pergunta ${i + 1}.` });
+    }
+  }
 
   try {
-    const test_name = questions[0].test_name;
+    console.log('Iniciando transação para inserir avaliação, perguntas, associações e opções.');
 
-    await knex.transaction(async trx => {
-      const questionPromises = questions.map(question => {
-        const { test_name, vaga_name, type} = question;
-        return trx('avaliacoes').insert({
-          test_name,
-          vaga_name,
-          type,
-          created_at: dateTime
+    // Transação no banco de dados para inserir avaliação, perguntas, associações e opções
+    await knex.transaction(async (trx) => {
+      // Insere a avaliação
+      console.log('Inserindo avaliação:', { titulo, descricao, vagaId });
+      const [avaliacaoId] = await trx('avaliacoes').insert({
+        titulo,
+        descricao,
+        vagaId,
+      }).returning('id');
+
+      console.log('Avaliação inserida com sucesso, ID:', avaliacaoId);
+
+      // Insere as perguntas e cria associações na tabela intermediária
+      for (const pergunta of perguntas) {
+        const { texto, tipo, peso = 1, opcoes } = pergunta; // Peso padrão é 1
+
+        console.log('Inserindo pergunta:', { texto, tipo, peso });
+        const [perguntaId] = await trx('perguntas').insert({
+          conteudo: texto,
+          tipo,
+          peso,
+        }).returning('id');
+
+        console.log('Pergunta inserida com sucesso, ID:', perguntaId);
+
+        // Insere a associação na tabela intermediária `avaliacao_pergunta`
+        console.log('Associando pergunta à avaliação na tabela intermediária.');
+        await trx('avaliacao_pergunta').insert({
+          avaliacaoId: avaliacaoId,  // ID da avaliação criada
+          perguntaId: perguntaId,    // ID da pergunta criada
         });
-      });
 
-      await Promise.all(questionPromises);  // Aguarde todas as promessas serem resolvidas
-      res.redirect(`/admin/avaliacoes-todas`);
+        console.log(`Pergunta ID ${perguntaId} associada à Avaliação ID ${avaliacaoId}.`);
+
+        // Insere as opções (somente se a pergunta for de múltipla escolha)
+        if (tipo === 'multiple_choice' && opcoes) {
+          const opcoesInsert = opcoes.map(opcao => ({
+            perguntaId,
+            conteudo: opcao, // Ajuste para usar o nome correto da coluna
+          }));
+
+          console.log('Inserindo opções para a pergunta:', opcoesInsert);
+          await trx('opcoes').insert(opcoesInsert);
+          console.log('Opções inseridas com sucesso.');
+        }
+      }
     });
 
-    
+    // Resposta de sucesso
+    console.log('Avaliação criada com sucesso!');
+    return res.status(201).json({ message: 'Avaliação criada com sucesso!' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erro ao adicionar perguntas', details: error.message });
+    console.error('Erro ao criar avaliação:', error);
+    return res.status(500).json({ error: 'Erro ao criar avaliação.' });
   }
 });
 
-/* GET create vagas page. */
-router.get('/avaliacao-nova', verificaAutenticacao, function (req, res, next) {
+// Rota para renderizar a página de edição de uma avaliação
+router.get('/avaliacao/editar/:id', async (req, res) => {
   try {
-    const listagemVagas = knex.select('*').from('vagas');
-    listagemVagas
-      .then((vagas) => {
-        console.log('Candidatos:', vagas);
-        res.render('./dashBoard/avaliacao-nova', { title: 'VOE', vagas: vagas });
-      })
-  } catch (error) {
-    console.error('Erro ao listar as vagas:', error);
-  }
-});
+    const { id } = req.params;
+    console.log(`Recebendo requisição para editar avaliação com ID: ${id}`);
 
-router.get('/avaliacoes-todas', verificaAutenticacao, async function (req, res, next) {
-  try {
-    // Subconsulta para obter nomes únicos de vagas
-    const subquery = knex('avaliacoes').distinct('vaga_name').as('distinct_vagas');
+    // Busca a avaliação e as perguntas associadas
+    const [avaliacao] = await knex('avaliacoes').where({ id }).select('*');
+    console.log('Avaliação encontrada:', avaliacao);
 
-    // Usando a subconsulta para buscar os dados completos
-    const exerciciosListados = await knex('avaliacoes')
-      .select('id', 'vaga_name', 'test_name', 'created_at')
-      .whereIn('vaga_name', function () {
-        this.select('vaga_name').from(subquery);
-      });
+    let perguntas = await knex('perguntas').where({ avaliacaoId: id }).select('*');
+    console.log('Perguntas associadas à avaliação:', perguntas);
 
-    console.log('Exercicios:', exerciciosListados);
-    res.render('./dashBoard/avaliacao-todas', { title: 'Express', exercicio: exerciciosListados });
-  } catch (error) {
-    console.error('Erro ao listar os exercicios:', error);
-    res.status(500).send('Erro ao listar os exercicios');
-  }
-});
-
-router.get('/avaliacao-editar/:id', verificaAutenticacao, async function (req, res, next) {
-  const { id } = req.params;
-  try {
-    const avaliacao = await knex('avaliacoes').where({ id }).first();
-    if (!avaliacao) {
-      return res.status(404).send('Avaliação não encontrada');
+    // Adiciona as opções de múltipla escolha para cada pergunta, se necessário
+    for (let pergunta of perguntas) {
+      if (pergunta.tipo === 'multiple_choice') {
+        const opcoes = await knex('opcoes').where({ perguntaId: pergunta.id }).select('*');
+        pergunta.opcoes = opcoes;  // Anexa as opções à pergunta
+        console.log(`Opções para a pergunta ${pergunta.id}:`, opcoes);
+      }
     }
-    res.render('./dashBoard/avaliacao-editar', { title: 'Editar Avaliação', avaliacao });
+
+    // Busca todas as vagas para o dropdown
+    const vagas = await knex('vagas').select('*');
+    // console.log('Lista de vagas:', vagas);
+
+    res.render('dashBoard/avaliacao-editar', { avaliacao, perguntas, vagas });
   } catch (error) {
     console.error('Erro ao buscar avaliação:', error);
     res.status(500).send('Erro ao buscar avaliação');
   }
 });
 
-router.post('/avaliacao-editar/:id', verificaAutenticacao, async function (req, res, next) {
-  function getCurrentDateTime() {
-    const now = new Date();
-
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0'); // Janeiro é 0!
-    const day = String(now.getDate()).padStart(2, '0');
-
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-
-    // Formato: YYYY-MM-DD HH:MM:SS
-    const formattedDateTime = `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
-
-    return formattedDateTime;
-  }
-  const dateTime = getCurrentDateTime();
-
-  const { id } = req.params;
-  const { test_name, vaga_name, type, text, options, created_at } = req.body; // Inclua os campos que deseja editar
+// Rota para enviar a avaliação
+router.post('/avaliacao/editar', async (req, res) => {
   try {
-    await knex('avaliacoes')
-      .where({ id })
-      .update({ test_name, vaga_name, type, text, options, created_at: dateTime });
-    res.redirect(`/admin/avaliacao-editar/${id}`);
-  } catch (error) {
-    console.error('Erro ao atualizar avaliação:', error);
-    res.status(500).send('Erro ao atualizar avaliação');
-  }
-});
+    const { id, titulo, descricao, vagaId, perguntas: perguntasJson } = req.body;
 
-router.get('/avaliacao-delete/:id', verificaAutenticacao, async function (req, res, next) {
-  const { id } = req.params;
-  try {
-    await knex('avaliacoes').where({ id }).del();
-    res.redirect('/admin/avaliacoes-todas');
-  } catch (error) {
-    console.error('Erro ao deletar avaliação:', error);
-    res.status(500).send('Erro ao deletar avaliação');
-  }
-});
+    // Verificando a requisição
+    console.log('Dados recebidos no corpo da requisição:', req.body);
 
+    // Converter perguntas de JSON string para array
+    const perguntas = JSON.parse(perguntasJson);
 
-router.get('/avaliacao-responder/:test_name', async function (req, res, next) {
-  const { test_name } = req.params;
-  const candidato_id = 86; // Supondo que o ID do candidato esteja disponível no objeto de autenticação
-  try {
-    const perguntas = await knex('avaliacoes').where({ test_name });
-    if (!perguntas || perguntas.length === 0) {
-      return res.status(404).send('Avaliação não encontrada');
-    }
-    res.render('./dashBoard/avaliacao-responder', { title: 'Responder Avaliação', perguntas, candidato_id });
-  } catch (error) {
-    console.error('Erro ao buscar perguntas:', error);
-    res.status(500).send('Erro ao buscar perguntas');
-  }
-});
+    // Atualizar os dados da avaliação
+    await knex('avaliacoes').where({ id }).update({ titulo, descricao, vagaId });
 
+    // Obter perguntas existentes da avaliação
+    const perguntasExistentes = await knex('perguntas').where({ avaliacaoId: id });
 
-// Rota para obter todas as vagas
-router.get('/api/vagas', verificaAutenticacao, async (req, res) => {
-  try {
-    const vagas = await knex('vagas').select('*');
-    res.json(vagas);
-  } catch (error) {
-    console.error('Erro ao obter vagas:', error);
-    res.status(500).send('Erro ao obter vagas');
-  }
-});
-// Rota para obter as perguntas de uma avaliação
-router.get('/api/avaliacoes/:avaliacaoNome/perguntas', verificaAutenticacao, async (req, res) => {
-  const { avaliacaoNome } = req.params;
-  try {
-    // Encontre a avaliação pelo nome
-    const avaliacao = await knex('avaliacoes').where({ test_name: avaliacaoNome }).first();
-    if (!avaliacao) {
-      return res.status(400).send('Avaliacao não existe');
-    }
+    // Criar um mapa de perguntas existentes para facilitar a atualização
+    const mapaPerguntas = {};
+    perguntasExistentes.forEach(p => {
+      mapaPerguntas[p.id] = p;
+    });
 
-    // Supondo que a coluna 'pergunta' na tabela 'avaliacoes' contenha as perguntas em texto simples, separadas por uma quebra de linha
-    const perguntasTexto = avaliacao.pergunta;
-    const perguntas = perguntasTexto.split('\n').map((pergunta, index) => ({
-      id: index + 1, // Usar o índice como ID temporário
-      texto: pergunta.trim()
-    }));
+    // Iterar sobre as perguntas recebidas
+    for (let pergunta of perguntas) {
+      const { id: perguntaId, texto, tipo, opcoes } = pergunta;
 
-    res.json(perguntas);
-  } catch (error) {
-    console.error('Erro ao obter perguntas:', error);
-    res.status(500).send('Erro ao obter perguntas');
-  }
-});
-router.post('/avaliacao-responder/:avaliacaoNome', verificaAutenticacao, async function (req, res, next) {
-  const { avaliacaoNome } = req.params;
-  const { vaga_cargo, respostas } = req.body; // Inclua os campos que deseja salvar
+      // Verifica se a pergunta existe
+      if (mapaPerguntas[perguntaId]) {
+        // Atualizar pergunta existente
+        await knex('perguntas').where({ id: perguntaId }).update({
+          conteudo: texto,
+          tipo: tipo
+        });
 
-  // Verifique se 'respostas' é um array, caso contrário, inicialize como um array vazio
-  let respostasArray = Array.isArray(respostas) ? respostas : [];
+        // Atualizar ou inserir opções da pergunta
+        const opcoesExistentes = await knex('opcoes').where({ perguntaId });
 
-  try {
-    // Verifique se o avaliacaoNome existe na tabela avaliacoes
-    const avaliacao = await knex('avaliacoes').where({ test_name: avaliacaoNome }).first();
-    if (!avaliacao) {
-      return res.status(400).send('Avaliacao não existe');
-    }
+        // Atualizar as opções existentes e adicionar novas, se necessário
+        for (let i = 0; i < opcoes.length; i++) {
+          const opcao = opcoes[i];
+          const opcaoExistente = opcoesExistentes[i];
 
-    const avaliacaoId = avaliacao.id;
-
-    // Supondo que a coluna 'pergunta' na tabela 'avaliacoes' contenha as perguntas em texto simples, separadas por uma quebra de linha
-    const perguntasTexto = avaliacao.pergunta;
-    const perguntas = perguntasTexto.split('\n').map((pergunta, index) => ({
-      id: index + 1, // Usar o índice como ID temporário
-      texto: pergunta.trim()
-    }));
-    if (!perguntas.length) {
-      return res.status(400).send('Avaliacao não possui perguntas');
-    }
-
-    // Recupere a vaga pelo cargo
-    const vaga = await knex('vagas').where({ cargo: vaga_cargo }).first();
-    if (!vaga) {
-      return res.status(400).send('Vaga não encontrada');
-    }
-
-    // Recupere os candidatos associados à vaga pelo cargo
-    console.log(`Procurando candidatos para a vaga_cargo: ${vaga_cargo}`);
-    const candidatos = await knex('candidatos').where({ vaga_aplicada: vaga.cargo }).pluck('id');
-    console.log(`Candidatos encontrados: ${candidatos.length}`);
-
-    if (!candidatos.length) {
-      return res.status(400).send('Nenhum candidato encontrado para a vaga especificada');
-    }
-
-    // Para cada candidato, insira as respostas
-    for (const candidato_id of candidatos) {
-      for (const resposta of respostasArray) {
-        // Certifique-se de que a resposta corresponde a uma das perguntas da avaliação
-        const pergunta = perguntas.find(p => p.id === parseInt(resposta.pergunta_id, 10));
-        if (!pergunta) {
-          return res.status(400).send('Resposta para pergunta inválida');
+          if (opcaoExistente) {
+            // Atualizar opção existente
+            await knex('opcoes').where({ id: opcaoExistente.id }).update({ conteudo: opcao });
+          } else {
+            // Criar nova opção se não existir
+            await knex('opcoes').insert({ perguntaId, conteudo: opcao });
+          }
         }
 
-        // Log para depuração
-        console.log('Inserindo resposta para candidato:', candidato_id);
-
-        await knex('respostas').insert({
-          avaliacao_id: avaliacaoId,
-          candidato_id,
-          pergunta_id: resposta.pergunta_id,
-          texto: resposta.texto,
-          opcoes: resposta.opcoes ? JSON.stringify(resposta.opcoes) : null,
+        // Remover opções extras, se houver
+        if (opcoes.length < opcoesExistentes.length) {
+          const opcoesParaRemover = opcoesExistentes.slice(opcoes.length);
+          for (let opcao of opcoesParaRemover) {
+            await knex('opcoes').where({ id: opcao.id }).del();
+          }
+        }
+      } else {
+        // Criar nova pergunta se não existir
+        const [newPerguntaId] = await knex('perguntas').insert({
+          avaliacaoId: id,
+          conteudo: texto,
+          tipo: tipo
         });
+
+        // Adicionar opções para a nova pergunta
+        for (let opcao of opcoes) {
+          await knex('opcoes').insert({ perguntaId: newPerguntaId, conteudo: opcao });
+        }
       }
     }
 
-    console.log('Redirecionando para /admin/avaliacoes-todas');
-    res.redirect('/admin/avaliacoes-todas');
+    // Remover perguntas que não foram enviadas
+    const idsPerguntasRecebidas = perguntas.map(p => p.id);
+    const perguntasParaRemover = perguntasExistentes.filter(p => !idsPerguntasRecebidas.includes(p.id));
+    for (let pergunta of perguntasParaRemover) {
+      // Primeiro, remover as opções associadas à pergunta
+      await knex('opcoes').where({ perguntaId: pergunta.id }).del();
+      // Depois, remover a pergunta
+      await knex('perguntas').where({ id: pergunta.id }).del();
+    }
+
+    res.status(200).json({ message: 'Avaliação editada com sucesso' });
   } catch (error) {
-    console.error('Erro ao salvar resposta:', error);
-    res.status(500).send('Erro ao salvar resposta');
+    console.error('Erro ao atualizar avaliação:', error);
+    res.status(500).json({ error: 'Erro ao atualizar avaliação' });
   }
 });
 
-// -----------------------
+// Rota para renderizar a avaliação para o candidato responder
+router.get('/responder/:id_avaliacao/:id_candidato', async (req, res) => {
+  const { id_avaliacao, id_candidato } = req.params;
 
-router.post('/gerar-links/:avaliacaoNome', async function (req, res, next) {
-  const { avaliacaoNome } = req.params;
-  const { vaga_cargo } = req.body; // Inclua os campos que deseja salvar
+  console.log(`Recebido ID da avaliação: ${id_avaliacao}, ID do candidato: ${id_candidato}`);
 
   try {
-    // Verifique se o avaliacaoNome existe na tabela avaliacoes
-    const avaliacao = await knex('avaliacoes').where({ test_name: avaliacaoNome }).first();
+    // 1. Buscar a avaliação pelo ID
+    const avaliacao = await knex('avaliacoes')
+      .where({ id: id_avaliacao })
+      .first();
+
+    console.log('Avaliação encontrada:', avaliacao);
+
     if (!avaliacao) {
-      return res.status(400).send('Avaliacao não existe');
+      console.log('Avaliação não encontrada.');
+      return res.status(404).send('Avaliação não encontrada.');
     }
 
-    const avaliacaoId = avaliacao.id;
+    // 2. Buscar as perguntas associadas à avaliação
+    const perguntas = await knex('perguntas')
+      .join('avaliacao_pergunta', 'perguntas.id', '=', 'avaliacao_pergunta.perguntaId')
+      .where('avaliacao_pergunta.avaliacaoId', id_avaliacao)
+      .select('perguntas.id', 'perguntas.conteudo', 'perguntas.tipo');
 
-    // Recupere a vaga pelo cargo
-    const vaga = await knex('vagas').where({ cargo: vaga_cargo }).first();
-    if (!vaga) {
-      return res.status(400).send('Vaga não encontrada');
+    console.log('Perguntas encontradas:', perguntas);
+
+    if (perguntas.length === 0) {
+      console.log('Nenhuma pergunta encontrada para esta avaliação.');
+      return res.status(404).send('Nenhuma pergunta encontrada para esta avaliação.');
     }
 
-    // Recupere os candidatos associados à vaga pelo cargo
-    const candidatos = await knex('candidatos').where({ vaga_aplicada: vaga.cargo }).select('*');
-    if (!candidatos.length) {
-      return res.status(400).send('Nenhum candidato encontrado para a vaga especificada');
-    }
+    // 3. Buscar as opções associadas a cada pergunta (caso sejam perguntas de múltipla escolha)
+    const opcoes = await knex('opcoes')
+      .whereIn('perguntaId', perguntas.map(pergunta => pergunta.id))
+      .select('id', 'perguntaId', 'conteudo');
 
-    // Gerar links únicos para cada candidato
-    const links = [];
-    for (const candidato of candidatos) {
-      const token = uuidv4();
-      const link = `http://localhost:3001/responder-avaliacao/${avaliacaoNome}/${token}`;
-      links.push({ candidato, link });
+    console.log('Opções encontradas:', opcoes);
 
-      // Atualizar o candidato com o token gerado
-      await knex('candidatos').where({ id: candidato.id }).update({ token });
-    }
+    // 4. Organizar as perguntas com suas respectivas opções (caso existam)
+    const perguntasComOpcoes = perguntas.map(pergunta => {
+      const opcoesDaPergunta = opcoes.filter(opcao => opcao.perguntaId === pergunta.id);
+      return { ...pergunta, opcoes: opcoesDaPergunta };
+    });
 
-    // Aqui, você pode enviar os links para os candidatos por e-mail ou outro meio
+    console.log('Perguntas com opções organizadas:', perguntasComOpcoes);
 
-    res.json({ links });
+    // 5. Renderizar a view para o candidato responder
+    res.render('dashBoard/avaliacao-responder', {
+      avaliacao,
+      perguntas: perguntasComOpcoes,
+      id_candidato // Passando o ID do candidato para a view
+    });
   } catch (error) {
-    console.error('Erro ao gerar links:', error);
-    res.status(500).send('Erro ao gerar links');
+    console.error('Erro ao buscar avaliação:', error);
+    res.status(500).send('Erro ao buscar avaliação');
   }
 });
 
-router.get('/responder-avaliacao/:avaliacaoNome/:token', async function (req, res, next) {
-  const { avaliacaoNome, token } = req.params;
 
+
+router.post('/respostas', async (req, res) => {
   try {
-    console.log(`Verificando token: ${token}`);
-    // Verifique se o avaliacaoNome existe na tabela avaliacoes
-    const avaliacao = await knex('avaliacoes').where({ test_name: avaliacaoNome }).first();
-    if (!avaliacao) {
-      return res.status(400).send('Avaliacao não existe');
-    }
+    const { avaliacaoId, respostas } = req.body;
 
-    const avaliacaoId = avaliacao.id;
-
-    // Verifique o token e recupere o candidato correspondente
-    const candidato = await knex('candidatos').where({ token }).first();
-    if (!candidato) {
-      return res.status(400).send('Token inválido ou expirado');
-    }
-
-    console.log(`Candidato encontrado: ${candidato.id}`);
-
-    // Supondo que a coluna 'pergunta' na tabela 'avaliacoes' contenha as perguntas em texto simples, separadas por uma quebra de linha
-    const perguntasTexto = avaliacao.pergunta;
-    const perguntas = perguntasTexto.split('\n').map((pergunta, index) => ({
-      id: index + 1, // Usar o índice como ID temporário
-      texto: pergunta.trim()
-    }));
-    if (!perguntas.length) {
-      return res.status(400).send('Avaliacao não possui perguntas');
-    }
-
-    // Renderize a página de resposta da avaliação para o candidato
-    res.render('responder-avaliacao', { candidato, avaliacao, perguntas });
-  } catch (error) {
-    console.error('Erro ao carregar avaliação:', error);
-    res.status(500).send('Erro ao carregar avaliação');
-  }
-});
-
-router.post('/enviar-respostas/:avaliacaoNome/:token', async function (req, res, next) {
-  const { avaliacaoNome, token } = req.params;
-  const { respostas } = req.body;
-
-  try {
-    // Verifique se o avaliacaoNome existe na tabela avaliacoes
-    const avaliacao = await knex('avaliacoes').where({ test_name: avaliacaoNome }).first();
-    if (!avaliacao) {
-      return res.status(400).send('Avaliacao não existe');
-    }
-
-    const avaliacaoId = avaliacao.id;
-
-    // Verifique o token e recupere o candidato correspondente
-    const candidato = await knex('candidatos').where({ token }).first();
-    if (!candidato) {
-      return res.status(400).send('Token inválido ou expirado');
-    }
-
-    // Verifique se 'respostas' é um array, caso contrário, inicialize como um array vazio
-    let respostasArray = Array.isArray(respostas) ? respostas : [];
-
-    // Para cada resposta, insira no banco de dados
-    for (const resposta of respostasArray) {
+    // Salvar as respostas no banco de dados
+    for (const [perguntaId, resposta] of Object.entries(respostas)) {
       await knex('respostas').insert({
-        avaliacao_id: avaliacaoId,
-        candidato_id: candidato.id,
-        pergunta_id: resposta.pergunta_id,
-        texto: resposta.texto,
-        opcoes: resposta.opcoes ? JSON.stringify(resposta.opcoes) : null,
+        avaliacaoId,
+        perguntaId,
+        resposta,
       });
     }
 
-    res.send('Respostas enviadas com sucesso');
+    res.status(201).json({ message: 'Respostas salvas com sucesso!' });
   } catch (error) {
-    console.error('Erro ao enviar respostas:', error);
-    res.status(500).send('Erro ao enviar respostas');
+    console.error('Erro ao salvar respostas:', error);
+    res.status(500).json({ message: 'Erro ao salvar respostas' });
+  }
+});
+
+router.post('/avaliacao/responder', async (req, res) => {
+  const { avaliacaoId, candidatoId, respostas } = req.body;
+
+  if (!respostas || typeof respostas !== 'object') {
+    return res.status(400).json({ error: 'Nenhuma resposta fornecida ou formato inválido.' });
+  }
+
+  try {
+    // Iterar sobre as respostas e inserir cada uma na tabela Respostas_Candidatos
+    const respostaPromises = Object.entries(respostas).map(async ([perguntaId, resposta]) => {
+      if (typeof resposta === 'string') {
+        const pergunta = await knex('perguntas').where({ id: perguntaId }).first();
+
+        if (!pergunta) {
+          throw new Error(`Pergunta com id ${perguntaId} não encontrada.`);
+        }
+
+        console.log(`Armazenando resposta para pergunta ${perguntaId}:`, resposta); // Log da resposta
+
+        if (pergunta.tipo === 'open') {
+          return knex('Respostas_Candidatos').insert({
+            candidato_id: candidatoId,
+            pergunta_id: perguntaId, // Armazena o ID da pergunta
+            resposta_texto: resposta, // Resposta aberta
+            resposta_id: null // NULL para resposta_id
+          });
+        } else if (pergunta.tipo === 'multiple_choice') {
+          return knex('Respostas_Candidatos').insert({
+            candidato_id: candidatoId,
+            pergunta_id: perguntaId, // Armazena o ID da pergunta
+            resposta_id: resposta, // ID da opção escolhida
+            resposta_texto: null // NULL para resposta_texto
+          });
+        }
+      } else {
+        throw new Error(`Formato de resposta inválido para pergunta ${perguntaId}.`);
+      }
+    });
+
+    // Executar todas as operações de inserção
+    await Promise.all(respostaPromises);
+
+    // Resposta de sucesso
+    res.status(200).json({ message: 'Respostas salvas com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao salvar respostas:', error);
+    res.status(500).json({ error: 'Erro ao salvar respostas.' });
   }
 });
 
 
+// Rota para buscar perguntas de uma avaliação
+router.get('/api/perguntas/:avaliacaoId', async (req, res) => {
+  const avaliacaoId = req.params.avaliacaoId;
+  console.log(`Recebendo requisição para buscar perguntas da avaliação com ID: ${avaliacaoId}`);
+
+  try {
+    // Verifica se a avaliação existe
+    const avaliacaoExiste = await knex('avaliacoes')
+      .where('id', avaliacaoId)
+      .first();
+
+    if (!avaliacaoExiste) {
+      console.log(`Avaliação com ID ${avaliacaoId} não encontrada.`);
+      return res.status(404).json({ error: 'Avaliação não encontrada.' });
+    }
+
+    console.log(`Avaliação com ID ${avaliacaoId} encontrada. Buscando perguntas...`);
+
+    // Busca as perguntas associadas à avaliação
+    const perguntas = await knex('perguntas')
+      .join('avaliacao_pergunta', 'perguntas.id', '=', 'avaliacao_pergunta.perguntaId')
+      .where('avaliacao_pergunta.avaliacaoId', avaliacaoId)
+      .select('perguntas.*');
+
+    console.log(`Perguntas encontradas: ${perguntas.length}`);
+
+    // Caso não encontre perguntas, retorne 404
+    if (perguntas.length === 0) {
+      console.log(`Nenhuma pergunta encontrada para a avaliação com ID ${avaliacaoId}.`);
+      return res.status(404).json({ error: 'Nenhuma pergunta encontrada para esta avaliação.' });
+    }
+
+    // Busca as opções associadas a cada pergunta de múltipla escolha
+    const perguntasComOpcoes = await Promise.all(perguntas.map(async (pergunta) => {
+      if (pergunta.tipo === 'multiple_choice') {
+        const opcoes = await knex('opcoes')
+          .where('perguntaId', pergunta.id)
+          .select('id', 'conteudo');
+        pergunta.opcoes = opcoes;
+      } else {
+        pergunta.opcoes = [];
+      }
+      return pergunta;
+    }));
+
+    // Logando o resultado final para verificação
+    console.log('Perguntas com opções organizadas:', JSON.stringify(perguntasComOpcoes, null, 2));
+
+    // Retornar as perguntas encontradas
+    return res.status(200).json(perguntasComOpcoes);
+  } catch (error) {
+    console.error(`Erro ao buscar perguntas para a avaliação com ID ${avaliacaoId}:`, error);
+    return res.status(500).json({ error: 'Erro ao buscar perguntas.' });
+  }
+});
+
+
+
+
+
+// Rota para deletar uma avaliação
+router.post('/avaliacao-delete/:id', async (req, res) => {
+  const { id } = req.params;
+  knex('avaliacoes').where({ id: id }).del()
+    .then(() => {
+      console.log('Avaliação deletada com sucesso!', id);
+      res.redirect('/admin/avaliacoes-todas');
+    })
+    .catch((error) => {
+      console.error('Erro ao deletar a avaliação:', error);
+      res.status(500).send('Erro ao deletar a avalição');
+    })
+});
+
+
+router.get('/avaliacao/resultado/:avaliacao_id', async (req, res) => {
+  const avaliacaoId = req.params.avaliacao_id;
+
+  try {
+    const resultados = await knex('Resultados')
+      .where({ avaliacao_id: avaliacaoId })
+      .join('Candidatos', 'Resultados.candidato_id', 'Candidatos.id')
+      .select('Candidatos.nome', 'Resultados.pontuacao');
+
+    res.render('admin/resultado_avaliacao', { resultados });
+  } catch (error) {
+    console.error('Erro ao buscar os resultados:', error);
+    res.status(500).send('Erro ao buscar os resultados');
+  }
+});
+
+
+// Configuração do transporter para envio de e-mails
+const transporter = nodemailer.createTransport({
+  service: 'gmail', // Usando o serviço Gmail
+  auth: {
+    user: 'joubert.idebrasil@gmail.com', // Seu e-mail do Gmail
+    pass: '20IDEbrasil@25', // Senha de aplicativo gerada
+  },
+});
+
+// Rota de envio da avaliação
+router.post('/enviar_avaliacao/:vagaId/:avaliacaoId', async (req, res) => {
+  try {
+    const { vagaId, avaliacaoId } = req.params;
+
+    // Aqui você pode adicionar a lógica para persistir a avaliação no banco de dados
+
+    // Configurações do e-mail
+    const mailOptions = {
+      from: 'joubert.idebrasil@gmail.com', // Seu e-mail do Gmail
+      to: 'joubertcl13@hotmail.com', // E-mail de destino
+      subject: 'Avaliação Enviada', // Assunto do e-mail
+      text: `A avaliação de ID: ${avaliacaoId} foi enviada para a vaga de ID: ${vagaId}.`, // Corpo do e-mail
+    };
+
+    // Envia o e-mail
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log('Erro ao enviar e-mail:', error);
+        return res.status(500).json({ message: 'Erro ao enviar a avaliação.' });
+      }
+      console.log('E-mail enviado:', info.response);
+      res.status(200).json({ message: 'Avaliação enviada com sucesso!' });
+    });
+
+  } catch (error) {
+    console.error('Erro ao processar a avaliação:', error);
+    res.status(500).json({ message: 'Erro ao processar a avaliação.' });
+  }
+});
 
 
 /**ROTAS DO MODULO PROFILE **/
@@ -1120,6 +1332,28 @@ router.get('/profile-manager', verificaAutenticacao, function (req, res, next) {
   res.render('./dashBoard/profile-manager', { title: 'Express' });
 });
 /**** FINAL ROTAS DO MODULO PROFILE ****/
+
+// Rota para exibir avaliações respondidas por um candidato
+router.get('/perfil/:candidatoId/avaliacoes', async (req, res) => {
+  try {
+    const { candidatoId } = req.params;
+
+    // Busca todas as avaliações que o candidato respondeu
+    const avaliacoesRespondidas = await knex('respostas_avaliacoes')
+      .join('avaliacoes', 'avaliacoes.id', 'respostas_avaliacoes.avaliacaoId')
+      .join('respostas', 'respostas.id', 'respostas_avaliacoes.respostaId')
+      .where('respostas_avaliacoes.candidatoId', candidatoId)
+      .select('avaliacoes.titulo', 'respostas_avaliacoes.avaliacaoId', 'respostas.resposta', 'respostas.pontuacao');
+
+    res.render('candidato/avaliacoes', { avaliacoesRespondidas });
+  } catch (error) {
+    console.error('Erro ao buscar avaliações do candidato:', error);
+    res.status(500).send('Erro ao carregar as avaliações respondidas');
+  }
+});
+
+
+
 
 /**ROTAS DO MODULO REGISTER **/
 /* GET register page. */
